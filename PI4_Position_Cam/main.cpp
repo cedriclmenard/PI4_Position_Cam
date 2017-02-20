@@ -9,12 +9,39 @@
 #include <iostream>
 #include "opencv2/core.hpp"
 #include "ps3eye.h"
+#include "PSEyeOCVVideoDevice.hpp"
+#include "opencv2/highgui.hpp"
 
+
+
+void CallBackMouse(int event, int x, int y,  int flags, void* userdata) {
+    if (event == CV_EVENT_LBUTTONDOWN) {
+        cv::Vec3b s = (*((cv::Mat*)userdata)).at<cv::Vec3b>(y,x);
+        std::cout << "BGR is : " << +s[0] << ", " << +s[1] << ", " << +s[2] << std::endl;
+    }
+}
 
 int main(int argc, const char * argv[]) {
-    //PS3EYECam::PS3EYERef eye;
-    const std::vector<ps3eye::PS3EYECam::PS3EYERef> devices = ps3eye::PS3EYECam::getDevices(false);
-    // insert code here...
-    std::cout << "Hello, World!\n";
+    //PSEyeOCVVideoDevice * dev = new PSEyeOCVVideoDevice(0);
+    PSEyeOCVVideoDevice dev = PSEyeOCVVideoDevice(0);
+    cv::Mat img;
+    cv::Mat binImg;
+    dev.setExposure(255);
+    cv::namedWindow("test");
+    cv::setMouseCallback("test", CallBackMouse,&img);
+    
+    while (cv::waitKey(17)) {
+        dev >> img;
+        cv::inRange(img, cv::Scalar(0,0,125), cv::Scalar(100,100,255), binImg);
+        cv::imshow("test",img);
+        cv::imshow("binImg", binImg);
+    }
+    
+    //cv::waitKey();
+    
+    //delete dev;
+    
+    
+    
     return 0;
 }

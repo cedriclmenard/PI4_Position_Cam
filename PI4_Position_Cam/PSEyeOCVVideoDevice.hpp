@@ -10,9 +10,24 @@
 #define PSEyeOCVVideoDevice_hpp
 
 #include <stdio.h>
+#include "opencv2/core.hpp"
+#include "ps3eye.h"
+//#include <ctype>
 
 class PSEyeOCVVideoDevice {
+public:
+    PSEyeOCVVideoDevice(unsigned int deviceIndex = 0);
+    ~PSEyeOCVVideoDevice();
+    void setExposure(uint8_t value);
+    uint8_t getExposure();
     
+private:
+    ps3eye::PS3EYECam::PS3EYERef cam;
+    cv::Mat lastFrame;
+    friend PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::Mat &output);
 };
+
+// Video stream operator from OpenCV
+PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::Mat &output);
 
 #endif /* PSEyeOCVVideoDevice_hpp */
