@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		820470BC1E59428E00486806 /* ps3eye.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 820470BA1E59428E00486806 /* ps3eye.cpp */; };
 		820470C01E59437800486806 /* PSEyeOCVVideoDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 820470BE1E59437800486806 /* PSEyeOCVVideoDevice.cpp */; };
+		820470C31E5CA58E00486806 /* Calibrator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 820470C11E5CA58E00486806 /* Calibrator.cpp */; };
+		820470C51E5E811800486806 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 820470C41E5E811800486806 /* SDL2.framework */; };
+		820470C81E5E81EC00486806 /* ImageView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 820470C61E5E81EC00486806 /* ImageView.cpp */; };
 		82205A3D1E575367009555DC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82205A3C1E575367009555DC /* main.cpp */; };
 		82205A661E5755F4009555DC /* libusb.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82205A651E5755F4009555DC /* libusb.dylib */; };
 		82205A7C1E575639009555DC /* libopencv_ccalib.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82205A671E575639009555DC /* libopencv_ccalib.3.1.0.dylib */; };
@@ -52,6 +55,11 @@
 		820470BD1E5942D500486806 /* libusb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libusb.h; sourceTree = "<group>"; };
 		820470BE1E59437800486806 /* PSEyeOCVVideoDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PSEyeOCVVideoDevice.cpp; sourceTree = "<group>"; };
 		820470BF1E59437800486806 /* PSEyeOCVVideoDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PSEyeOCVVideoDevice.hpp; sourceTree = "<group>"; };
+		820470C11E5CA58E00486806 /* Calibrator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Calibrator.cpp; sourceTree = "<group>"; };
+		820470C21E5CA58E00486806 /* Calibrator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Calibrator.hpp; sourceTree = "<group>"; };
+		820470C41E5E811800486806 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = PI4_Position_Cam/lib/SDL2.framework; sourceTree = "<group>"; };
+		820470C61E5E81EC00486806 /* ImageView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImageView.cpp; sourceTree = "<group>"; };
+		820470C71E5E81EC00486806 /* ImageView.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ImageView.hpp; sourceTree = "<group>"; };
 		82205A391E575367009555DC /* PI4_Position_Cam */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PI4_Position_Cam; sourceTree = BUILT_PRODUCTS_DIR; };
 		82205A3C1E575367009555DC /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		82205A651E5755F4009555DC /* libusb.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libusb.dylib; path = PI4_Position_Cam/lib/libusb.dylib; sourceTree = "<group>"; };
@@ -84,6 +92,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				820470C51E5E811800486806 /* SDL2.framework in Frameworks */,
 				82205A7C1E575639009555DC /* libopencv_ccalib.3.1.0.dylib in Frameworks */,
 				82205A7D1E575639009555DC /* libopencv_ccalib.3.1.0.dylib in Frameworks */,
 				82205A7E1E575639009555DC /* libopencv_ccalib.3.1.0.dylib in Frameworks */,
@@ -134,6 +143,10 @@
 			children = (
 				82205A911E575732009555DC /* lib */,
 				82205A3C1E575367009555DC /* main.cpp */,
+				820470C61E5E81EC00486806 /* ImageView.cpp */,
+				820470C71E5E81EC00486806 /* ImageView.hpp */,
+				820470C11E5CA58E00486806 /* Calibrator.cpp */,
+				820470C21E5CA58E00486806 /* Calibrator.hpp */,
 				820470BE1E59437800486806 /* PSEyeOCVVideoDevice.cpp */,
 				820470BF1E59437800486806 /* PSEyeOCVVideoDevice.hpp */,
 				820470BA1E59428E00486806 /* ps3eye.cpp */,
@@ -146,6 +159,7 @@
 		82205A641E5755F3009555DC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				820470C41E5E811800486806 /* SDL2.framework */,
 				82205A671E575639009555DC /* libopencv_ccalib.3.1.0.dylib */,
 				82205A681E575639009555DC /* libopencv_ccalib.3.1.0.dylib */,
 				82205A691E575639009555DC /* libopencv_ccalib.3.1.0.dylib */,
@@ -232,6 +246,8 @@
 			files = (
 				820470BC1E59428E00486806 /* ps3eye.cpp in Sources */,
 				82205A3D1E575367009555DC /* main.cpp in Sources */,
+				820470C31E5CA58E00486806 /* Calibrator.cpp in Sources */,
+				820470C81E5E81EC00486806 /* ImageView.cpp in Sources */,
 				820470C01E59437800486806 /* PSEyeOCVVideoDevice.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -330,6 +346,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = Z93C3Z7BL2;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/PI4_Position_Cam/lib",
+				);
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -344,6 +364,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = Z93C3Z7BL2;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/PI4_Position_Cam/lib",
+				);
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

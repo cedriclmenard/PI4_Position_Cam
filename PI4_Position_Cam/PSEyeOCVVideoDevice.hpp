@@ -23,11 +23,11 @@ public:
     
 private:
     ps3eye::PS3EYECam::PS3EYERef cam;
-    cv::Mat lastFrame;
-    friend PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::Mat &output);
+    cv::UMat lastFrame;
+    friend PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::InputOutputArray &output);
 };
 
 // Video stream operator from OpenCV
-PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::Mat &output);
+PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::InputOutputArray &output);
 
 #endif /* PSEyeOCVVideoDevice_hpp */

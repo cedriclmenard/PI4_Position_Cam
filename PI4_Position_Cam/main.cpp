@@ -11,6 +11,8 @@
 #include "ps3eye.h"
 #include "PSEyeOCVVideoDevice.hpp"
 #include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
+#include "SDL2/SDL.h"
 
 
 
@@ -22,16 +24,19 @@ void CallBackMouse(int event, int x, int y,  int flags, void* userdata) {
 }
 
 int main(int argc, const char * argv[]) {
+    
+    
     //PSEyeOCVVideoDevice * dev = new PSEyeOCVVideoDevice(0);
     PSEyeOCVVideoDevice dev = PSEyeOCVVideoDevice(0);
-    cv::Mat img;
-    cv::Mat binImg;
-    dev.setExposure(255);
+    cv::UMat img;
+    cv::UMat binImg;
+    dev.setExposure(220);
     cv::namedWindow("test");
     cv::setMouseCallback("test", CallBackMouse,&img);
     
     while (cv::waitKey(17)) {
         dev >> img;
+        //cv::medianBlur(img, img, 7);
         cv::inRange(img, cv::Scalar(0,0,125), cv::Scalar(100,100,255), binImg);
         cv::imshow("test",img);
         cv::imshow("binImg", binImg);

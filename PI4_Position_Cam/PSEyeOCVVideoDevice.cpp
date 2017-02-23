@@ -33,9 +33,9 @@ uint8_t PSEyeOCVVideoDevice::getExposure(){
 }
 
 // This function may need some error checking/type checking on "output" Mat, but this way it is faster. Use with care. Might not too, because of copy-constructor implementation of cv::Mat
-PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::Mat &output){
+PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::InputOutputArray output){
     input.cam->getFrame(input.lastFrame.data);
-    output = input.lastFrame;
+    output.assign(input.lastFrame); // "Copy constructor"-like way to copy mat to inputoutputarray, with out unnecessary copy
     return input;
 }
 
