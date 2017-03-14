@@ -23,7 +23,7 @@ public:
     
 private:
     ps3eye::PS3EYECam::PS3EYERef cam;
-    cv::UMat lastFrame;
+    cv::Mat lastFrame;
     friend PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::InputOutputArray &output);
 };
 

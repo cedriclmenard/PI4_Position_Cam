@@ -11,17 +11,39 @@
 #define ImageView_hpp
 
 #include <stdio.h>
+#include <iostream>
+#include "SDL2/SDL.h"
+#include "pthread.h"
+
+enum THREADSIG {
+    STOP,
+    CONTINUE
+};
 
 class ImageView{
 public:
-    ImageView();
+    ImageView(std::string windowName,unsigned int x, unsigned int y, unsigned int width, unsigned height);
     ~ImageView();
-    void show(unsigned char rbg[],unsigned int sizeX, unsigned int sizeY);
+    void showBGR(unsigned char bgr[],unsigned int width, unsigned int height);
+    void close();
+    bool isValid();
     
     
 private:
     unsigned int sizeX;
     unsigned int sizeY;
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    //SDL_Surface *currentSurface;
+    SDL_Texture *currentTexture;
+    
+    
+    // Event thread
+    pthread_t _eventThreadId;
+    int eventThreadExitSignal = CONTINUE;
+    friend void *eventThreadStart(void*);
+    void (*_mouseDownCallback)(int x, int y) = nullptr;
+    
 };
 
 #endif /* ImageView_hpp */
