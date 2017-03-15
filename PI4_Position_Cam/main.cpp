@@ -23,6 +23,10 @@ cv::Vec3b centerColor = cv::Vec3b(155,155,155);
 //        std::cout << "BGR is : " << +centerColor[0] << ", " << +centerColor[1] << ", " << +centerColor[2] << std::endl;
 //    }
 //}
+void mouseCallback(int x, int y, void* userData) {
+    centerColor = (*((cv::UMat*)userData)).getMat(cv::ACCESS_READ).at<cv::Vec3b>(y,x);
+    std::cout << "BGR is : " << +centerColor[0] << ", " << +centerColor[1] << ", " << +centerColor[2] << std::endl;
+}
 
 int main(int argc, const char * argv[]) {
     
@@ -52,24 +56,24 @@ int main(int argc, const char * argv[]) {
     PSEyeOCVVideoDevice dev = PSEyeOCVVideoDevice(0);
     cv::UMat img;
     cv::UMat binImg;
-    dev.setExposure(100);
+    dev.setExposure(150);
+    dev.setGain(63);
     
     ImageView view = ImageView("test", 100, 100, 640, 480);
+    ImageView view2 = ImageView("test Binary",100,580,640,480);
+    view.setMouseDownCallback(mouseCallback,&img);
     
     
-    while (view.isValid()) {
+    
+    while (view.waitKey(10) < 0) {
         dev >> img;
         cv::medianBlur(img, img, 7);
         cv::inRange(img, centerColor - cv::Vec3b(20,20,20), centerColor + cv::Vec3b(20,20,20), binImg);
         //cv::imshow("test",img);
         //cv::imshow("binImg", binImg);
         view.showBGR(img.getMat(cv::ACCESS_READ).data, 640, 480);
+        view2.showGrayscale(binImg.getMat(cv::ACCESS_READ).data, 640, 480);
     }
-    
-    //cv::waitKey();
-    
-    //delete dev;
-    
     
     
     return 0;

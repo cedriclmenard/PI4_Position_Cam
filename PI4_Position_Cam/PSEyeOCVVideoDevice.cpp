@@ -32,6 +32,14 @@ uint8_t PSEyeOCVVideoDevice::getExposure(){
     return cam->getExposure();
 }
 
+void PSEyeOCVVideoDevice::setGain(uint8_t value){
+    cam->setGain(value);
+}
+
+uint8_t PSEyeOCVVideoDevice::getGain(){
+    return cam->getGain();
+}
+
 // This function may need some error checking/type checking on "output" Mat, but this way it is faster. Use with care. Might not too, because of copy-constructor implementation of cv::Mat
 PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::InputOutputArray output){
     input.cam->getFrame(input.lastFrame.data);

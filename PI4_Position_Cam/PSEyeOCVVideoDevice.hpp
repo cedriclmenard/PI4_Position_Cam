@@ -18,8 +18,13 @@ class PSEyeOCVVideoDevice {
 public:
     PSEyeOCVVideoDevice(unsigned int deviceIndex = 0);
     ~PSEyeOCVVideoDevice();
+    
+    // Options
     void setExposure(uint8_t value);
     uint8_t getExposure();
+    
+    void setGain(uint8_t value);
+    uint8_t getGain();
     
 private:
     ps3eye::PS3EYECam::PS3EYERef cam;

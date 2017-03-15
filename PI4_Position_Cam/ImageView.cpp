@@ -8,18 +8,31 @@
 
 #include "ImageView.hpp"
 
+// Compile time supporting functions
+
+// Grayscale
+static SDL_Color grayscalePalette[256];
+static bool grayscalePaletteBuilt = false;
+
+
 // Declaration
-void *eventThreadStart(void*);
 
 bool SDLisInit = false;
 
 ImageView::ImageView(std::string windowName,unsigned int x, unsigned int y, unsigned int width, unsigned height) {
     // Initialize SDL if it is not already
     if (~SDLisInit) {
-        if (SDL_Init(SDL_INIT_VIDEO) != 0){
+        if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) != 0){
             std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
         }
     }
+    
+    if (~grayscalePaletteBuilt) {
+        for (int i = 0; i<256; i++) {
+            grayscalePalette[i].b = grayscalePalette[i].g = grayscalePalette[i].r = i;
+        }
+    }
+    
     
     // Create window and store pointer
     window = SDL_CreateWindow(windowName.c_str(), x, y, width, height, SDL_WINDOW_SHOWN);
@@ -33,14 +46,6 @@ ImageView::ImageView(std::string windowName,unsigned int x, unsigned int y, unsi
     if (renderer == nullptr){
         SDL_DestroyWindow(window);
         std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-    }
-    
-    // Create event thread for this window
-    if (pthread_create(&_eventThreadId, 0, eventThreadStart, (void*)this)) {
-        SDL_DestroyWindow(window);
-        SDL_DestroyRenderer(renderer);
-        std::cout << "pthread_create Error" << std::endl;
         SDL_Quit();
     }
 }
@@ -86,43 +91,81 @@ void ImageView::showBGR(unsigned char *bgr, unsigned int width, unsigned int hei
     SDL_RenderPresent(renderer);
 }
 
+void ImageView::showGrayscale(unsigned char *gray, unsigned int width, unsigned int height){
+    SDL_Surface* currentSurface = SDL_CreateRGBSurfaceFrom(gray,
+                                                           width,
+                                                           height,
+                                                           8,
+                                                           width,
+                                                           0,
+                                                           0,
+                                                           0,
+                                                           0);
+    SDL_SetPaletteColors(currentSurface->format->palette, grayscalePalette, 0, 256);
+    if (currentSurface == nullptr){
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        std::cout << "SDL_CreateRGBSurfaceFrom Error: " << SDL_GetError() << std::endl;
+        SDL_Quit();
+    }
+    
+    currentTexture = SDL_CreateTextureFromSurface(renderer, currentSurface);
+    SDL_FreeSurface(currentSurface);
+    if (currentTexture == nullptr){
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
+        SDL_Quit();
+    }
+    
+    // Invalidate backbuffer (double buffering)
+    SDL_RenderClear(renderer);
+    // Draw the texture
+    SDL_RenderCopy(renderer, currentTexture, NULL, NULL);
+    // Update the screen
+    SDL_RenderPresent(renderer);
+}
+
 void ImageView::close(){
-    eventThreadExitSignal = STOP;
-    pthread_join(_eventThreadId, NULL);
     SDL_DestroyTexture(currentTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
-bool ImageView::isValid(){
-    return (eventThreadExitSignal == CONTINUE) ? true : false;
-}
-
-// MARK: Multithreading
-
-typedef ImageView* eventThreadParent;
-
-void *eventThreadStart(void* arg){
+KeyPress ImageView::waitKey(unsigned int waitTimeMS){
     SDL_Event e;
-    eventThreadParent parent = (eventThreadParent) arg;
-    while (parent->eventThreadExitSignal == CONTINUE) {
-        SDL_PollEvent(&e);
-        switch (e.type) {
-            case SDL_QUIT:
-                parent->close();
-                break;
-            case SDL_KEYDOWN:
-                parent->close();
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-                if (parent->_mouseDownCallback != nullptr) {
-                    parent->_mouseDownCallback(e.button.x,e.button.y);
-                }
-                break;
+//    unsigned int t1 = SDL_GetTicks();
+//    unsigned int dTime = 0;
+//    unsigned int t2 = 0;
+//    while (dTime < waitTimeMS) {
+//        SDL_Delay(10);
+//        if(SDL_PollEvent(&e)) {
+//            if (e.type == SDL_KEYDOWN) {
+//                return e.key.keysym.sym;
+//            }
+//            t2 = SDL_GetTicks();
+//            dTime = t2-t1;
+//            t1 = t2;
+//        }
+//    }
+    SDL_Delay(waitTimeMS);
+    if(SDL_PollEvent(&e)) {
+        if (e.type == SDL_KEYDOWN) {
+            return e.key.keysym.sym;
+        } else if (e.type == SDL_MOUSEBUTTONDOWN) {
+            if (_mouseDownCallback != NULL) {
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                _mouseDownCallback(x,y,_mouseDownCallbackUserData);
+            }
         }
     }
-    pthread_exit(NULL);
+    return -1;
 }
 
+void ImageView::setMouseDownCallback(void (*mouseDownCallback)(int x, int y, void* userData), void* userData){
+    _mouseDownCallbackUserData = userData;
+    _mouseDownCallback = mouseDownCallback;
+}
 
