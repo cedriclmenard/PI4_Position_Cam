@@ -29,16 +29,16 @@ std::vector<cv::Point3f> Create3DChessboardCorners(cv::Size boardSize, float squ
 }
 
 template <class VideoDevice>
-Calibrator<VideoDevice>::Calibrator(VideoDevice dev) :
+CalibratedDevice<VideoDevice>::CalibratedDevice(VideoDevice dev) :
 _dev(dev)
 {
     
 }
 
 template <class VideoDevice>
-void Calibrator<VideoDevice>::calibrate(unsigned int numberOfFrames, int boardNumOfSquaresInWidth, int boardNumOfSquaresInHeight, float squareSizeInM)
+void CalibratedDevice<VideoDevice>::calibrate(ImageView &view, unsigned int numberOfFrames, int boardNumOfSquaresInWidth, int boardNumOfSquaresInHeight, float squareSizeInM)
 {
-    
+    // TODO: Change waitKey
     cv::Size boardSize = cv::Size(boardNumOfSquaresInWidth, boardNumOfSquaresInHeight);
     
     std::vector<std::vector<cv::Point3f> > objectPoints;
@@ -95,21 +95,48 @@ void Calibrator<VideoDevice>::calibrate(unsigned int numberOfFrames, int boardNu
     
     cv::destroyAllWindows();
     
-    cv::Mat CM = cv::Mat(3, 3, CV_64FC1);
-    cv::Mat D;
-    cv::Mat R, T;
+    _CM = cv::Mat(3, 3, CV_64FC1);
     
     // MARK: Calibrate Camera
-    calibrateCamera(objectPoints, imagePoints, img.size(), CM, D, R, T, CV_CALIB_RATIONAL_MODEL);
+    calibrateCamera(objectPoints, imagePoints, img.size(), _CM, _D, _R, _T, CV_CALIB_RATIONAL_MODEL);
     
-    cv::FileStorage fs1("calibration.yml", cv::FileStorage::WRITE);
-    fs1 << "CM" << CM;
-    fs1 << "D" << D;
-    fs1 << "R" << R;
-    fs1 << "T" << T;
-    
-    fs1.release();
+    // Get distortion correction map for speed
+    cv::initUndistortRectifyMap(_CM, _D, cv::Mat(),
+                                cv::getOptimalNewCameraMatrix(_CM, _D, img.size(), 1, img.size(), 0),
+                                img.size(), CV_16SC2, _map1, _map2);
 
 }
 
+template<class VideoDevice>
+void CalibratedDevice<VideoDevice>::saveParameters(std::string filename){
+    cv::FileStorage fs1(filename, cv::FileStorage::WRITE);
+    fs1 << "CM" << _CM;
+    fs1 << "D" << _D;
+    fs1 << "R" << _R;
+    fs1 << "T" << _T;
+    
+    fs1.release();
+}
 
+template<class VideoDevice>
+void CalibratedDevice<VideoDevice>::loadParameters(std::string filename){
+    cv::FileStorage fs1(filename, cv::FileStorage::READ);
+    fs1["CM"] >> _CM;
+    fs1["D"] >> _D;
+    fs1["R"] >> _R;
+    fs1["T"] >> _T;
+    
+    fs1.release();
+}
+
+template<class VideoDevice>
+void CalibratedDevice<VideoDevice>::correctImage(cv::InputArray &input, cv::OutputArray &output){
+    cv::remap(input, output, _map1, _map2, cv::INTER_LINEAR);
+}
+
+template<class VideoDevice>
+void CalibratedDevice<VideoDevice>::getImage(cv::OutputArray img) {
+    cv::Mat _img;
+    _dev >> _img;
+    correctImage(_img,img);
+}

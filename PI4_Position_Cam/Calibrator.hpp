@@ -11,16 +11,23 @@
 
 #include <stdio.h>
 #include "opencv2/opencv.hpp"
+#include "ImageView.hpp"
+#include "BaseVideoDevice.hpp"
 
 template <class VideoDevice>
-class Calibrator{
+class CalibratedDevice : BaseVideoDevice {
     VideoDevice _dev;
+    cv::Mat _CM, _D, _R, _T, _map1, _map2;
+    double _alpha = 0;
+    virtual void getImage(cv::OutputArray img);
+    
 public:
-    Calibrator(VideoDevice dev);
-    void calibrate(unsigned int numberOfFrames, int boardNumOfSquaresInWidth, int boardNumOfSquaresInHeight, float squareSizeInM);
-    
-private:
-    
+    CalibratedDevice(VideoDevice dev);
+    void calibrate(ImageView &view, unsigned int numberOfFrames, int boardNumOfSquaresInWidth, int boardNumOfSquaresInHeight, float squareSizeInM);
+    void saveParameters(std::string filename);
+    void loadParameters(std::string filename);
+    void correctImage(cv::InputArray &input, cv::OutputArray &output);
+    void setAlpha(double alpha);
     
 };
 

@@ -35,6 +35,7 @@
 		82205A8E1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82205A791E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */; };
 		82205A8F1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82205A7A1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */; };
 		82205A901E575639009555DC /* libopencv_ximgproc.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82205A7B1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */; };
+		823B485E1E7B6602009AA735 /* BaseVideoDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -85,6 +86,8 @@
 		82205A7A1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_ximgproc.3.1.0.dylib; path = ../../../../../usr/local/lib/libopencv_ximgproc.3.1.0.dylib; sourceTree = "<group>"; };
 		82205A7B1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_ximgproc.3.1.0.dylib; path = ../../../../../usr/local/lib/libopencv_ximgproc.3.1.0.dylib; sourceTree = "<group>"; };
 		82205A911E575732009555DC /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lib; sourceTree = "<group>"; };
+		823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BaseVideoDevice.cpp; sourceTree = "<group>"; };
+		823B485D1E7B6602009AA735 /* BaseVideoDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseVideoDevice.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +150,8 @@
 				820470C71E5E81EC00486806 /* ImageView.hpp */,
 				820470C11E5CA58E00486806 /* Calibrator.cpp */,
 				820470C21E5CA58E00486806 /* Calibrator.hpp */,
+				823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */,
+				823B485D1E7B6602009AA735 /* BaseVideoDevice.hpp */,
 				820470BE1E59437800486806 /* PSEyeOCVVideoDevice.cpp */,
 				820470BF1E59437800486806 /* PSEyeOCVVideoDevice.hpp */,
 				820470BA1E59428E00486806 /* ps3eye.cpp */,
@@ -248,6 +253,7 @@
 				82205A3D1E575367009555DC /* main.cpp in Sources */,
 				820470C31E5CA58E00486806 /* Calibrator.cpp in Sources */,
 				820470C81E5E81EC00486806 /* ImageView.cpp in Sources */,
+				823B485E1E7B6602009AA735 /* BaseVideoDevice.cpp in Sources */,
 				820470C01E59437800486806 /* PSEyeOCVVideoDevice.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
