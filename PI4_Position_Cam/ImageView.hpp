@@ -23,18 +23,18 @@ public:
     void showBGR(unsigned char bgr[],unsigned int width, unsigned int height);
     void showGrayscale(unsigned char *gray, unsigned int width, unsigned int height);
     void close();
-    KeyPress waitKey(unsigned int waitTimeMS);
+    KeyPress waitKeyAndProcessEvent(unsigned int waitTimeMS);
     void setMouseDownCallback(void (*mouseDownCallback)(int x, int y, void* userData), void* userData);
     
     
     
 private:
-    unsigned int sizeX;
-    unsigned int sizeY;
-    SDL_Window *window;
-    SDL_Renderer *renderer;
+    unsigned int _sizeX;
+    unsigned int _sizeY;
+    SDL_Window *_window;
+    SDL_Renderer *_renderer;
     //SDL_Surface *currentSurface;
-    SDL_Texture *currentTexture;
+    SDL_Texture *_currentTexture;
     
     // Mouse callback
     void (*_mouseDownCallback)(int, int, void*) = NULL;

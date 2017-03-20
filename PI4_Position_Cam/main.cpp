@@ -65,7 +65,7 @@ int main(int argc, const char * argv[]) {
     
     
     
-    while (view.waitKey(10) < 0) {
+    while (view.waitKeyAndProcessEvent(10) < 0) {
         dev >> img;
         cv::medianBlur(img, img, 7);
         cv::inRange(img, centerColor - cv::Vec3b(20,20,20), centerColor + cv::Vec3b(20,20,20), binImg);

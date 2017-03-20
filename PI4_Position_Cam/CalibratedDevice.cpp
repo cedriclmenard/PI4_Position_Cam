@@ -68,7 +68,8 @@ void CalibratedDevice<VideoDevice>::calibrate(ImageView &view, unsigned int numb
             drawChessboardCorners(img, boardSize, corners, found);
         }
         
-        imshow("Calibration Image", img);
+        view.showBGR(img.data, img.cols, img.rows);
+        //imshow("Calibration Image", img);
         
         
         k = cv::waitKey(10);

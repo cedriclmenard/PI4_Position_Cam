@@ -36,6 +36,8 @@
 		82205A8F1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82205A7A1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */; };
 		82205A901E575639009555DC /* libopencv_ximgproc.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82205A7B1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */; };
 		823B485E1E7B6602009AA735 /* BaseVideoDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */; };
+		82B24E8D1E7E229A006FAB12 /* imgui_impl_sdl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B24E8B1E7E229A006FAB12 /* imgui_impl_sdl.cpp */; };
+		82B24E901E7E2333006FAB12 /* VerticalThinningAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B24E8E1E7E2333006FAB12 /* VerticalThinningAlgorithm.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -88,6 +90,10 @@
 		82205A911E575732009555DC /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lib; sourceTree = "<group>"; };
 		823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BaseVideoDevice.cpp; sourceTree = "<group>"; };
 		823B485D1E7B6602009AA735 /* BaseVideoDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseVideoDevice.hpp; sourceTree = "<group>"; };
+		82B24E8B1E7E229A006FAB12 /* imgui_impl_sdl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_impl_sdl.cpp; sourceTree = "<group>"; };
+		82B24E8C1E7E229A006FAB12 /* imgui_impl_sdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui_impl_sdl.h; sourceTree = "<group>"; };
+		82B24E8E1E7E2333006FAB12 /* VerticalThinningAlgorithm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VerticalThinningAlgorithm.cpp; sourceTree = "<group>"; };
+		82B24E8F1E7E2333006FAB12 /* VerticalThinningAlgorithm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VerticalThinningAlgorithm.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +152,8 @@
 			children = (
 				82205A911E575732009555DC /* lib */,
 				82205A3C1E575367009555DC /* main.cpp */,
+				82B24E8E1E7E2333006FAB12 /* VerticalThinningAlgorithm.cpp */,
+				82B24E8F1E7E2333006FAB12 /* VerticalThinningAlgorithm.hpp */,
 				820470C61E5E81EC00486806 /* ImageView.cpp */,
 				820470C71E5E81EC00486806 /* ImageView.hpp */,
 				820470C11E5CA58E00486806 /* CalibratedDevice.cpp */,
@@ -154,6 +162,8 @@
 				823B485D1E7B6602009AA735 /* BaseVideoDevice.hpp */,
 				820470BE1E59437800486806 /* PSEyeOCVVideoDevice.cpp */,
 				820470BF1E59437800486806 /* PSEyeOCVVideoDevice.hpp */,
+				82B24E8B1E7E229A006FAB12 /* imgui_impl_sdl.cpp */,
+				82B24E8C1E7E229A006FAB12 /* imgui_impl_sdl.h */,
 				820470BA1E59428E00486806 /* ps3eye.cpp */,
 				820470BB1E59428E00486806 /* ps3eye.h */,
 				820470BD1E5942D500486806 /* libusb.h */,
@@ -250,10 +260,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				820470BC1E59428E00486806 /* ps3eye.cpp in Sources */,
+				82B24E8D1E7E229A006FAB12 /* imgui_impl_sdl.cpp in Sources */,
 				82205A3D1E575367009555DC /* main.cpp in Sources */,
 				820470C31E5CA58E00486806 /* CalibratedDevice.cpp in Sources */,
 				820470C81E5E81EC00486806 /* ImageView.cpp in Sources */,
 				823B485E1E7B6602009AA735 /* BaseVideoDevice.cpp in Sources */,
+				82B24E901E7E2333006FAB12 /* VerticalThinningAlgorithm.cpp in Sources */,
 				820470C01E59437800486806 /* PSEyeOCVVideoDevice.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

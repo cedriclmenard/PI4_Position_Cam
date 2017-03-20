@@ -35,25 +35,25 @@ ImageView::ImageView(std::string windowName,unsigned int x, unsigned int y, unsi
     
     
     // Create window and store pointer
-    window = SDL_CreateWindow(windowName.c_str(), x, y, width, height, SDL_WINDOW_SHOWN);
-    if (window == nullptr){
+    _window = SDL_CreateWindow(windowName.c_str(), x, y, width, height, SDL_WINDOW_SHOWN);
+    if (_window == nullptr){
         std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
     }
     
     // Create rendered
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (renderer == nullptr){
-        SDL_DestroyWindow(window);
+    _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (_renderer == nullptr){
+        SDL_DestroyWindow(_window);
         std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
     }
 }
 
 ImageView::~ImageView() {
-    SDL_DestroyTexture(currentTexture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
+    SDL_DestroyTexture(_currentTexture);
+    SDL_DestroyRenderer(_renderer);
+    SDL_DestroyWindow(_window);
     SDL_Quit();
 }
 
@@ -68,27 +68,27 @@ void ImageView::showBGR(unsigned char *bgr, unsigned int width, unsigned int hei
                                               0xFF0000,
                                               0);
     if (currentSurface == nullptr){
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
+        SDL_DestroyRenderer(_renderer);
+        SDL_DestroyWindow(_window);
         std::cout << "SDL_CreateRGBSurfaceFrom Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
     }
     
-    currentTexture = SDL_CreateTextureFromSurface(renderer, currentSurface);
+    _currentTexture = SDL_CreateTextureFromSurface(_renderer, currentSurface);
     SDL_FreeSurface(currentSurface);
-    if (currentTexture == nullptr){
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
+    if (_currentTexture == nullptr){
+        SDL_DestroyRenderer(_renderer);
+        SDL_DestroyWindow(_window);
         std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
     }
     
     // Invalidate backbuffer (double buffering)
-    SDL_RenderClear(renderer);
+    SDL_RenderClear(_renderer);
     // Draw the texture
-    SDL_RenderCopy(renderer, currentTexture, NULL, NULL);
+    SDL_RenderCopy(_renderer, _currentTexture, NULL, NULL);
     // Update the screen
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(_renderer);
 }
 
 void ImageView::showGrayscale(unsigned char *gray, unsigned int width, unsigned int height){
@@ -103,65 +103,72 @@ void ImageView::showGrayscale(unsigned char *gray, unsigned int width, unsigned 
                                                            0);
     SDL_SetPaletteColors(currentSurface->format->palette, grayscalePalette, 0, 256);
     if (currentSurface == nullptr){
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
+        SDL_DestroyRenderer(_renderer);
+        SDL_DestroyWindow(_window);
         std::cout << "SDL_CreateRGBSurfaceFrom Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
     }
     
-    currentTexture = SDL_CreateTextureFromSurface(renderer, currentSurface);
+    _currentTexture = SDL_CreateTextureFromSurface(_renderer, currentSurface);
     SDL_FreeSurface(currentSurface);
-    if (currentTexture == nullptr){
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
+    if (_currentTexture == nullptr){
+        SDL_DestroyRenderer(_renderer);
+        SDL_DestroyWindow(_window);
         std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
     }
     
     // Invalidate backbuffer (double buffering)
-    SDL_RenderClear(renderer);
+    SDL_RenderClear(_renderer);
     // Draw the texture
-    SDL_RenderCopy(renderer, currentTexture, NULL, NULL);
+    SDL_RenderCopy(_renderer, _currentTexture, NULL, NULL);
     // Update the screen
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(_renderer);
 }
 
 void ImageView::close(){
-    SDL_DestroyTexture(currentTexture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
+    SDL_DestroyTexture(_currentTexture);
+    SDL_DestroyRenderer(_renderer);
+    SDL_DestroyWindow(_window);
     SDL_Quit();
 }
 
-KeyPress ImageView::waitKey(unsigned int waitTimeMS){
-    SDL_Event e;
-//    unsigned int t1 = SDL_GetTicks();
-//    unsigned int dTime = 0;
-//    unsigned int t2 = 0;
-//    while (dTime < waitTimeMS) {
-//        SDL_Delay(10);
-//        if(SDL_PollEvent(&e)) {
-//            if (e.type == SDL_KEYDOWN) {
-//                return e.key.keysym.sym;
-//            }
-//            t2 = SDL_GetTicks();
-//            dTime = t2-t1;
-//            t1 = t2;
-//        }
-//    }
-    SDL_Delay(waitTimeMS);
-    if(SDL_PollEvent(&e)) {
-        if (e.type == SDL_KEYDOWN) {
-            return e.key.keysym.sym;
-        } else if (e.type == SDL_MOUSEBUTTONDOWN) {
-            if (_mouseDownCallback != NULL) {
-                int x, y;
-                SDL_GetMouseState(&x, &y);
-                _mouseDownCallback(x,y,_mouseDownCallbackUserData);
+KeyPress ImageView::waitKeyAndProcessEvent(unsigned int waitTimeMS){
+    if (waitTimeMS != 0) {
+        SDL_Event e;
+        SDL_Delay(waitTimeMS);
+        unsigned int windowFlags = SDL_GetWindowFlags(_window);
+        if(SDL_PollEvent(&e) && (windowFlags & SDL_WINDOW_INPUT_FOCUS)) {
+            if (e.type == SDL_KEYDOWN) {
+                return e.key.keysym.sym;
+            } else if (e.type == SDL_MOUSEBUTTONDOWN) {
+                if (_mouseDownCallback != NULL) {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    _mouseDownCallback(x,y,_mouseDownCallbackUserData);
+                }
             }
         }
+        return -1;
+    } else {
+        SDL_Event e;
+        while (true) {  // Stay indefinitely
+            SDL_Delay(100);
+            unsigned int windowFlags = SDL_GetWindowFlags(_window);
+            if(SDL_PollEvent(&e) && (windowFlags & SDL_WINDOW_INPUT_FOCUS)) {
+                if (e.type == SDL_KEYDOWN) {
+                    return e.key.keysym.sym;
+                } else if (e.type == SDL_MOUSEBUTTONDOWN) {
+                    if (_mouseDownCallback != NULL) {
+                        int x, y;
+                        SDL_GetMouseState(&x, &y);
+                        _mouseDownCallback(x,y,_mouseDownCallbackUserData);
+                    }
+                }
+            }
+
+        }
     }
-    return -1;
 }
 
 void ImageView::setMouseDownCallback(void (*mouseDownCallback)(int x, int y, void* userData), void* userData){
