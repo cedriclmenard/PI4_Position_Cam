@@ -47,4 +47,9 @@ PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::InputOutputArray
     return input;
 }
 
+unsigned int PSEyeOCVVideoDevice::getNumberOfAvailableDevices() {
+    std::vector<ps3eye::PS3EYECam::PS3EYERef> devices( ps3eye::PS3EYECam::getDevices() );
+    return devices.size();
+}
+
 // TODO: Add functions to change camera settings

@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <iostream>
 #include "SDL2/SDL.h"
+#include "Views.hpp"
 
 typedef int KeyPress;
 

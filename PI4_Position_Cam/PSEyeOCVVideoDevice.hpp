@@ -30,6 +30,8 @@ private:
     ps3eye::PS3EYECam::PS3EYERef cam;
     cv::Mat lastFrame;
     friend PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::InputOutputArray &output);
+    
+    static unsigned int getNumberOfAvailableDevices();
 };
 
 // Video stream operator from OpenCV

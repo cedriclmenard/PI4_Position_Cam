@@ -17,16 +17,11 @@ static bool grayscalePaletteBuilt = false;
 
 // Declaration
 
-bool SDLisInit = false;
 
 ImageView::ImageView(std::string windowName,unsigned int x, unsigned int y, unsigned int width, unsigned height) {
-    // Initialize SDL if it is not already
-    if (~SDLisInit) {
-        if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) != 0){
-            std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
-        }
-    }
+    InitializeSDLOGLForViews();
     
+    // Setup palettes
     if (~grayscalePaletteBuilt) {
         for (int i = 0; i<256; i++) {
             grayscalePalette[i].b = grayscalePalette[i].g = grayscalePalette[i].r = i;
@@ -54,7 +49,8 @@ ImageView::~ImageView() {
     SDL_DestroyTexture(_currentTexture);
     SDL_DestroyRenderer(_renderer);
     SDL_DestroyWindow(_window);
-    SDL_Quit();
+    //SDL_Quit();
+    QuitSDLOGLForViews();
 }
 
 void ImageView::showBGR(unsigned char *bgr, unsigned int width, unsigned int height){
