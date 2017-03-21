@@ -11,6 +11,8 @@
 ImVec4 clearColor = ImColor(255,255,255);
 ImVec4 titleBarColor = ImColor(150,150,150);
 ImVec4 titleBarColorDark = ImColor(90,90,90);
+ImVec4 closeButtonLight = ImColor(180,50,50);
+ImVec4 closeButtonDark = ImColor(130,80,80);
 
 SettingsView::SettingsView(std::string windowName, int x, int y, int w, int h, int* bracketValue) :
 _windowName(windowName), _bracketValue(bracketValue)
@@ -25,6 +27,9 @@ _windowName(windowName), _bracketValue(bracketValue)
     ImGui::PushStyleColor(ImGuiCol_TitleBg, titleBarColorDark);
     ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, titleBarColorDark);
     ImGui::PushStyleColor(ImGuiCol_TitleBgActive, titleBarColor);
+    ImGui::PushStyleColor(ImGuiCol_CloseButton, closeButtonDark);
+    ImGui::PushStyleColor(ImGuiCol_CloseButtonActive, closeButtonLight);
+    ImGui::PushStyleColor(ImGuiCol_CloseButtonHovered, closeButtonLight);
     
 }
 
