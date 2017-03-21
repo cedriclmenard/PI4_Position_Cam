@@ -13,8 +13,8 @@
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
 #include "SDL2/SDL.h"
-#include "ImageView.hpp"
 #include "SettingsView.hpp"
+#include "VerticalThinningAlgorithm.hpp"
 
 cv::Vec3b centerColor = cv::Vec3b(155,155,155);
 
@@ -39,8 +39,8 @@ int main(int argc, const char * argv[]) {
     //ImageView view = ImageView("test", 100, 100, 640, 480);
     //ImageView view2 = ImageView("test Binary",100,580,640,480);
     //view.setMouseDownCallback(mouseCallback,&img);
-    
-    SettingsView settView = SettingsView("This is a test", 0, 0, 1280, 720);
+    int bracketSize = 20;
+    SettingsView settView = SettingsView("This is a test", 0, 0, 1280, 720, &bracketSize);
     settView.setMouseCallbackOnBGRImage(mouseCallback, &img);
     
     
@@ -48,15 +48,40 @@ int main(int argc, const char * argv[]) {
     while (!settView.hasEnded()) {
         dev >> img;
         cv::medianBlur(img, img, 7);
-        cv::inRange(img, centerColor - cv::Vec3b(20,20,20), centerColor + cv::Vec3b(20,20,20), binImg);
+        cv::inRange(img, centerColor - cv::Vec3b(bracketSize,bracketSize,bracketSize), centerColor + cv::Vec3b(bracketSize,bracketSize,bracketSize), binImg);
+        //cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
+        cv::morphologyEx(binImg, binImg, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(21,21)));
+        cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
+        
+        
         
         //view.showBGR(img.getMat(cv::ACCESS_READ).data, 640, 480);
         //view2.showGrayscale(binImg.getMat(cv::ACCESS_READ).data, 640, 480);
         
+        VerticalThinningAlgorithm algo = VerticalThinningAlgorithm(img2);
+        algo.compute();
+        std::vector<float> result = algo.getResult();
+        
+//        std::ostringstream oss;
+//        
+//        if (!result.empty())
+//        {
+//            // Convert all but the last element to avoid a trailing ","
+//            std::copy(result.begin(), result.end()-1,
+//                      std::ostream_iterator<int>(oss, ","));
+//            
+//            // Now add the last element with no delimiter
+//            oss << result.back();
+//        }
+//        
+//        const char* str = oss.str().c_str();
         
         SDL_Event e;
         SDL_PollEvent(&e);
-        settView.runForThisFrame(e, img.getMat(cv::ACCESS_READ).data, binImg.getMat(cv::ACCESS_READ).data, 640, 480);
+        //settView.runForThisFrame(e, img.getMat(cv::ACCESS_READ).data, binImg.getMat(cv::ACCESS_READ).data, 640, 480);
+        settView.runForThisFrame(e, img.getMat(cv::ACCESS_READ).data, binImg.getMat(cv::ACCESS_READ).data, 640, 480, "", result);
+        
+        
     }
     
     

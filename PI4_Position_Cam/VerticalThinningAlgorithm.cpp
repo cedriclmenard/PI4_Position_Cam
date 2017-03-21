@@ -15,13 +15,13 @@ struct ParallelVerticalThinning : public cv::ParallelLoopBody {
     size_t _ySize;
     unsigned char* _data;
     //std::shared_ptr<double> _points;
-    double* _points;
+    float* _points;
     
     ParallelVerticalThinning(cv::Mat &binImg) :
-    _binImg(binImg), _stepSize(binImg.step1()), _ySize(binImg.size[1]), _data(binImg.data)
+    _binImg(binImg), _stepSize(binImg.step1()), _ySize(binImg.size[0]*binImg.step1()), _data(binImg.data)
     {
         //_points.reset(new double[binImg.cols], std::default_delete<double[]>());
-        _points = new double[binImg.cols];  // Non-managed, because it is automatically managed when creating
+        _points = new float[binImg.cols];  // Non-managed, because it is automatically managed when creating
         // creating a vector from this pointer (see VerticalThinningAlgorithm::compute() )
     }
     
@@ -35,17 +35,26 @@ struct ParallelVerticalThinning : public cv::ParallelLoopBody {
             unsigned char* start = _data + i;
             unsigned int j = 0;
             
-            double avgPosition = 0;
+            float avgPosition = 0;
             unsigned int avgCount = 0;
             while (j < _ySize) {
-                while (start[j] == 0) {
-                    j++;
+                while (start[j*_stepSize] == 0) {
+                    if (j*_stepSize >= (_ySize-1)) {
+                        break;
+                    } else {
+                        j++;
+                    }
                 }
-                while (start[j] != 0) {
+                while (start[j*_stepSize] != 0 && j*_stepSize < _ySize) {
                     avgPosition += j;
                     avgCount++;
+                    j++;
                 }
-                avgPosition /= avgCount;
+                if (avgCount != 0) {
+                    avgPosition /= avgCount;
+                } else {
+                    avgPosition = 0;
+                }
                 break;
             }
             
@@ -75,7 +84,7 @@ void VerticalThinningAlgorithm::compute() {
     _points.assign(paraVertThin._points, paraVertThin._points + _img.cols);
 }
 
-std::vector<double> VerticalThinningAlgorithm::getResult() {
+std::vector<float> VerticalThinningAlgorithm::getResult() {
     //std::vector<double> result(_points.get(), _points.get() + _img.cols);
     
     return _points;

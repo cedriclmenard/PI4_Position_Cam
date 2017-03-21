@@ -16,6 +16,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include "Views.hpp"
+#include <vector>
 
 class SettingsView {
     SDL_DisplayMode _displayMode;
@@ -24,15 +25,16 @@ class SettingsView {
     std::string _windowName;
     bool _toShow = true;
     bool _toQuit = false;
+    int* _bracketValue;
     
     // Callbacks
     void (*_mouseCallbackOnBGRImage)(int x, int y, void* userData) = NULL;
     void *_mouseCallbackOnBGRImageUserData = NULL;
     
 public:
-    SettingsView(std::string windowName, int x, int y, int w, int h);
+    SettingsView(std::string windowName, int x, int y, int w, int h, int* bracketValue);
     ~SettingsView();
-    void runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigned char* grayscale, int w, int h);
+    void runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigned char* grayscale, int w, int h, const char* text, std::vector<float> data);
     void showNextFrame();
     void hideNextFrame();
     bool hasEnded();

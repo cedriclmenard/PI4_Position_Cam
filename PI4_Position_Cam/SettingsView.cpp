@@ -8,10 +8,12 @@
 
 #include "SettingsView.hpp"
 
-ImVec4 clearColor = ImColor(114,144,154);
+ImVec4 clearColor = ImColor(255,255,255);
+ImVec4 titleBarColor = ImColor(150,150,150);
+ImVec4 titleBarColorDark = ImColor(90,90,90);
 
-SettingsView::SettingsView(std::string windowName, int x, int y, int w, int h) :
-_windowName(windowName)
+SettingsView::SettingsView(std::string windowName, int x, int y, int w, int h, int* bracketValue) :
+_windowName(windowName), _bracketValue(bracketValue)
 {
     InitializeSDLOGLForViews();
     
@@ -19,6 +21,10 @@ _windowName(windowName)
     _window = SDL_CreateWindow(windowName.c_str(), x, y, w, h, SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE);
     _glContext = SDL_GL_CreateContext(_window);
     ImGui_ImplSdl_Init(_window);
+    
+    ImGui::PushStyleColor(ImGuiCol_TitleBg, titleBarColorDark);
+    ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, titleBarColorDark);
+    ImGui::PushStyleColor(ImGuiCol_TitleBgActive, titleBarColor);
     
 }
 
@@ -30,8 +36,9 @@ SettingsView::~SettingsView() {
     QuitSDLOGLForViews();
 }
 
-void SettingsView::runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigned char* grayscale, int w, int h) {
+void SettingsView::runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigned char* grayscale, int w, int h, const char* text, std::vector<float> data) {
     // This is the main loop for rendering this window
+    static bool showSettings = true;
     static bool showInitialImage = true;
     static bool showBinaryImage = true;
     
@@ -48,23 +55,23 @@ void SettingsView::runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigne
         
         // MARK: Window processing
         {
-            ImGui::Begin("Settings");
-            static float f = 0;
+            ImGui::Begin("Settings", &showSettings);
             ImGui::Text("This is a test");
-            ImGui::SliderFloat("This is a float", &f, 0, 1);
+            ImGui::SliderInt("Color bracket", _bracketValue, 1, 150);
+            //ImGui::TextWrapped("%s", text);
+            ImGui::PlotLines("Detected Lines", data.data(), data.size());
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
         
         {
             ImGui::SetNextWindowPos(ImVec2(300, 20), ImGuiSetCond_Once);
-            ImGui::SetNextWindowPos(ImVec2(w, h), ImGuiSetCond_Once);
-            ImGui::Begin("Initial Image", &showInitialImage);
+            ImGui::Begin("Initial Image", &showInitialImage, ImVec2(0,0), -1.0f, ImGuiWindowFlags_NoResize);
+            //ImGui::Begin("Initial Image", &showInitialImage);
             ImTextureID tex = (ImTextureID)bgrImageToTexture(bgr, w, h);
             ImGui::Image(tex, ImVec2(w,h));
             if (ImGui::IsItemClicked()) {
                 if (_mouseCallbackOnBGRImage != NULL) {
-                    ImVec2 mouse = ImGui::GetCursorPos();
                     int x, y;
                     x = ImGui::GetMousePos().x - ImGui::GetWindowPos().x - ImGui::GetWindowContentRegionMin().x;
                     y = ImGui::GetMousePos().y - ImGui::GetWindowPos().y - ImGui::GetWindowContentRegionMin().y;
@@ -79,16 +86,12 @@ void SettingsView::runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigne
             ImGui::End();
         }
         {
-            ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_Once);
-            ImGui::Begin("Binary Image", &showBinaryImage);
+            ImGui::SetNextWindowPos(ImVec2(600, 20), ImGuiSetCond_Once);
+            ImGui::Begin("Binary Image", &showBinaryImage, ImVec2(0,0), -1.0f, ImGuiWindowFlags_NoResize);
             ImTextureID tex = (ImTextureID)grayscaleImageToTexture(grayscale, w, h);
             ImGui::Image(tex, ImVec2(w,h));
             ImGui::End();
         }
-        
-        //bool show_test_window = true;
-        //ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
-        //ImGui::ShowTestWindow(&show_test_window);
         
         
         

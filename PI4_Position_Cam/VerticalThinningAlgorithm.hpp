@@ -17,12 +17,12 @@ class VerticalThinningAlgorithm {
     cv::Mat _returnImg;
     bool isComputed = false;
     
-    std::vector<double> _points;
+    std::vector<float> _points;
     
 public:
     VerticalThinningAlgorithm(cv::Mat &binImg);
     void compute();
-    std::vector<double> getResult();
+    std::vector<float> getResult();
 };
 
 #endif /* VerticalThinningAlgorithm_hpp */

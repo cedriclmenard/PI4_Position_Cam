@@ -174,8 +174,9 @@
 				82FF15B11E804CE700E5AB5B /* ImGUI */,
 				82205A911E575732009555DC /* lib */,
 				82FF15B21E804CF400E5AB5B /* PSEye Drivers */,
-				82205A3C1E575367009555DC /* main.cpp */,
+				82FF15B31E804D2400E5AB5B /* Image Processing */,
 				82FF15B41E80515600E5AB5B /* Views */,
+				82205A3C1E575367009555DC /* main.cpp */,
 				820470C11E5CA58E00486806 /* CalibratedDevice.cpp */,
 				820470C21E5CA58E00486806 /* CalibratedDevice.hpp */,
 				823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */,
@@ -185,7 +186,6 @@
 				82B24E8B1E7E229A006FAB12 /* imgui_impl_sdl.cpp */,
 				82B24E8C1E7E229A006FAB12 /* imgui_impl_sdl.h */,
 				820470BD1E5942D500486806 /* libusb.h */,
-				82FF15B31E804D2400E5AB5B /* Image Processing */,
 			);
 			path = PI4_Position_Cam;
 			sourceTree = "<group>";
@@ -258,14 +258,22 @@
 		82FF15B41E80515600E5AB5B /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				820470C61E5E81EC00486806 /* ImageView.cpp */,
-				820470C71E5E81EC00486806 /* ImageView.hpp */,
+				82FF15BB1E809D5900E5AB5B /* Deprecated */,
 				82FF15B51E80516E00E5AB5B /* SettingsView.cpp */,
 				82FF15B61E80516E00E5AB5B /* SettingsView.hpp */,
 				82FF15B81E805E1400E5AB5B /* Views.cpp */,
 				82FF15B91E805E1400E5AB5B /* Views.hpp */,
 			);
 			name = Views;
+			sourceTree = "<group>";
+		};
+		82FF15BB1E809D5900E5AB5B /* Deprecated */ = {
+			isa = PBXGroup;
+			children = (
+				820470C61E5E81EC00486806 /* ImageView.cpp */,
+				820470C71E5E81EC00486806 /* ImageView.hpp */,
+			);
+			name = Deprecated;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
