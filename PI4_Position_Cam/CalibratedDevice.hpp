@@ -13,16 +13,19 @@
 #include "opencv2/opencv.hpp"
 #include "ImageView.hpp"
 #include "BaseVideoDevice.hpp"
+#include "PSEyeOCVVideoDevice.hpp"
+#include "opencv2/calib3d/calib3d.hpp"
 
 template <class VideoDevice>
-class CalibratedDevice : BaseVideoDevice {
+class CalibratedDevice : public BaseVideoDevice {
     VideoDevice _dev;
     cv::Mat _CM, _D, _R, _T, _map1, _map2;
     double _alpha = 0;
-    virtual void getImage(cv::OutputArray img);
+    virtual void getImage(cv::OutputArray img) override;
+    bool isCalibrated = false;
     
 public:
-    CalibratedDevice(VideoDevice dev);
+    CalibratedDevice(VideoDevice &dev);
     void calibrate(ImageView &view, unsigned int numberOfFrames, int boardNumOfSquaresInWidth, int boardNumOfSquaresInHeight, float squareSizeInM);
     void saveParameters(std::string filename);
     void loadParameters(std::string filename);

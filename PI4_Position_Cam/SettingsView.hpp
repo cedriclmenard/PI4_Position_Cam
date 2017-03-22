@@ -30,6 +30,10 @@ class SettingsView {
     // Callbacks
     void (*_mouseCallbackOnBGRImage)(int x, int y, void* userData) = NULL;
     void *_mouseCallbackOnBGRImageUserData = NULL;
+    void (*_loadCalibration)(std::string* filePath, void* userData) = NULL;
+    void* _loadCalibrationUserData = NULL;
+    void (*_saveCalibration)(std::string* filePath, void* userData) = NULL;
+    void* _saveCalibrationUserData = NULL;
     
 public:
     SettingsView(std::string windowName, int x, int y, int w, int h, int* bracketValue);
@@ -39,6 +43,8 @@ public:
     void hideNextFrame();
     bool hasEnded();
     void setMouseCallbackOnBGRImage(void (*mouseCallbackOnBGRImage)(int x, int y, void* userData), void* mouseCallbackOnBGRImageUserData = NULL);
+    void setLoadCalibrationCallback(void (*loadCalibration)(std::string* filePath, void* userData), void* loadCalibrationUserData = NULL);
+    void setSaveCalibrationCallback(void (*saveCalibration)(std::string* filePath, void* userData), void* saveCalibrationUserData = NULL);
 };
 
 

@@ -54,6 +54,7 @@ void fileSelection() {
     show_next_file_popup = false;
     if (!filesystemWasSet) setFileSystem("");
     if (ImGui::BeginPopupModal("fileselection")) {
+        ImGui::SetWindowSize(ImVec2(600, 300),ImGuiSetCond_Once);
         static bool firstTime = true;
         static char buf[500];
         if (firstTime) {
@@ -73,6 +74,20 @@ void fileSelection() {
             }
         }
         ImGui::ListBoxFooter();
+        ImGui::Separator();
+        
+        ImGui::Columns(5, NULL, false);
+        for (int i = 0; i < 3;i++) ImGui::NextColumn();
+        if (ImGui::Button("Cancel")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::NextColumn();
+        if (ImGui::Button("Load Selected")) {
+            if (selectedIdx >= 0) {
+                calibrationFilePath = files.at(selectedIdx);
+            }
+        }
+        
         ImGui::EndPopup();
     }
 }
@@ -184,9 +199,9 @@ void SettingsView::runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigne
         
         if (show_settings_window) showSettingsWindow(data, _bracketValue);
         
-        if (show_initial_image_window) showInitialImageWindow(bgr, w, h, _mouseCallbackOnBGRImage, _mouseCallbackOnBGRImageUserData);
+        if (show_initial_image_window && bgr != NULL) showInitialImageWindow(bgr, w, h, _mouseCallbackOnBGRImage, _mouseCallbackOnBGRImageUserData);
 
-        if (show_binary_image_window) showBinaryImageWindow(grayscale, w, h);
+        if (show_binary_image_window && grayscale != NULL) showBinaryImageWindow(grayscale, w, h);
         
         if (show_next_file_popup) {
             ImGui::OpenPopup("fileselection");
@@ -218,4 +233,13 @@ void SettingsView::hideNextFrame() {
 void SettingsView::setMouseCallbackOnBGRImage(void (*mouseCallbackOnBGRImage)(int x, int y, void* userData), void* mouseCallbackOnBGRImageUserData) {
     _mouseCallbackOnBGRImage = mouseCallbackOnBGRImage;
     _mouseCallbackOnBGRImageUserData = mouseCallbackOnBGRImageUserData;
+}
+
+void SettingsView::setLoadCalibrationCallback(void (*loadCalibration)(std::string* filePath, void* userData), void* loadCalibrationUserData) {
+    _loadCalibration = loadCalibration;
+    _loadCalibrationUserData = loadCalibrationUserData;
+}
+void SettingsView::setSaveCalibrationCallback(void (*saveCalibration)(std::string* filePath, void* userData), void* saveCalibrationUserData) {
+    _saveCalibration = saveCalibration;
+    _saveCalibrationUserData = saveCalibrationUserData;
 }

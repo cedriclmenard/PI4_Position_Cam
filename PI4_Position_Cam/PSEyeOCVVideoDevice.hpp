@@ -12,11 +12,13 @@
 #include <stdio.h>
 #include "opencv2/core.hpp"
 #include "ps3eye.h"
+#include "BaseVideoDevice.hpp"
 //#include <ctype>
 
 class PSEyeOCVVideoDevice {
 public:
-    PSEyeOCVVideoDevice(unsigned int deviceIndex = 0);
+    PSEyeOCVVideoDevice(unsigned int deviceIndex);
+    PSEyeOCVVideoDevice();
     ~PSEyeOCVVideoDevice();
     
     // Options
@@ -26,12 +28,19 @@ public:
     void setGain(uint8_t value);
     uint8_t getGain();
     
+    // Set to device (later)
+    bool setDeviceIndexNotInit(unsigned int deviceIndex);
+    
+    static unsigned int getNumberOfAvailableDevices();
+    
 private:
     ps3eye::PS3EYECam::PS3EYERef cam;
     cv::Mat lastFrame;
     friend PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::InputOutputArray &output);
+    bool camWasInit = false;
+    //virtual void getImage(cv::OutputArray img);
     
-    static unsigned int getNumberOfAvailableDevices();
+    
 };
 
 // Video stream operator from OpenCV

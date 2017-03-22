@@ -17,11 +17,30 @@ PSEyeOCVVideoDevice::PSEyeOCVVideoDevice(unsigned int deviceIndex){
     cam = devices.at(deviceIndex);
     assert(cam->init(640,480,60));  // BGR output format, as per OpenCV mat format
     cam->start();
+    camWasInit = true;
     
 }
 
+PSEyeOCVVideoDevice::PSEyeOCVVideoDevice() {
+    lastFrame.create(480, 640, CV_8UC3);
+}
+
+bool PSEyeOCVVideoDevice::setDeviceIndexNotInit(unsigned int deviceIndex) {
+    if (!camWasInit) {
+        std::vector<ps3eye::PS3EYECam::PS3EYERef> devices( ps3eye::PS3EYECam::getDevices() );
+        cam = devices.at(deviceIndex);
+        assert(cam->init(640,480,60));  // BGR output format, as per OpenCV mat format
+        cam->start();
+        camWasInit = true;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 PSEyeOCVVideoDevice::~PSEyeOCVVideoDevice(){
-    cam->stop();
+    if (camWasInit)
+        cam->stop();
 }
 
 void PSEyeOCVVideoDevice::setExposure(uint8_t value){
@@ -48,8 +67,13 @@ PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::InputOutputArray
 }
 
 unsigned int PSEyeOCVVideoDevice::getNumberOfAvailableDevices() {
-    std::vector<ps3eye::PS3EYECam::PS3EYERef> devices( ps3eye::PS3EYECam::getDevices() );
+    std::vector<ps3eye::PS3EYECam::PS3EYERef> devices( ps3eye::PS3EYECam::getDevices(true) );
     return devices.size();
 }
+
+//void PSEyeOCVVideoDevice::getImage(cv::OutputArray img) {
+//    cam->getFrame(lastFrame.data);
+//    img.assign(lastFrame);
+//}
 
 // TODO: Add functions to change camera settings

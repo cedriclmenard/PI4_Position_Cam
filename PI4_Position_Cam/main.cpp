@@ -15,6 +15,7 @@
 #include "SDL2/SDL.h"
 #include "SettingsView.hpp"
 #include "VerticalThinningAlgorithm.hpp"
+//#include "CalibratedDevice.hpp"
 
 cv::Vec3b centerColor = cv::Vec3b(155,155,155);
 
@@ -30,11 +31,13 @@ int main(int argc, const char * argv[]) {
     
     
     // Setup input device
-    PSEyeOCVVideoDevice dev = PSEyeOCVVideoDevice(0);
+    //PSEyeOCVVideoDevice dev = PSEyeOCVVideoDevice(0);
+    PSEyeOCVVideoDevice dev = PSEyeOCVVideoDevice();
+    //CalibratedDevice<PSEyeOCVVideoDevice> calibDev(dev);
     cv::UMat img;
     cv::UMat binImg;
-    dev.setExposure(150);
-    dev.setGain(63);
+    //dev.setExposure(150);
+    //dev.setGain(63);
     
     //ImageView view = ImageView("test", 100, 100, 640, 480);
     //ImageView view2 = ImageView("test Binary",100,580,640,480);
@@ -43,24 +46,31 @@ int main(int argc, const char * argv[]) {
     SettingsView settView = SettingsView("This is a test", 0, 0, 1280, 720, &bracketSize);
     settView.setMouseCallbackOnBGRImage(mouseCallback, &img);
     
+    void* imgData = NULL;
+    void* binData = NULL;
+    std::vector<float> result;
+    
     
     
     while (!settView.hasEnded()) {
-        dev >> img;
-        cv::medianBlur(img, img, 7);
-        cv::inRange(img, centerColor - cv::Vec3b(bracketSize,bracketSize,bracketSize), centerColor + cv::Vec3b(bracketSize,bracketSize,bracketSize), binImg);
-        //cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
-        cv::morphologyEx(binImg, binImg, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(21,21)));
-        cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
+        if (PSEyeOCVVideoDevice::getNumberOfAvailableDevices() != 0) {
+            dev.setDeviceIndexNotInit(0);
+            dev >> img;
+            cv::medianBlur(img, img, 7);
+            cv::inRange(img, centerColor - cv::Vec3b(bracketSize,bracketSize,bracketSize), centerColor + cv::Vec3b(bracketSize,bracketSize,bracketSize), binImg);
+            //cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
+            cv::morphologyEx(binImg, binImg, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(10,10)));
+            cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
+            
+            
+            
+            VerticalThinningAlgorithm algo = VerticalThinningAlgorithm(img2);
+            algo.compute();
+            result = algo.getResult();
+            imgData = img.getMat(cv::ACCESS_READ).data;
+            binData = binImg.getMat(cv::ACCESS_READ).data;
+        }
         
-        
-        
-        //view.showBGR(img.getMat(cv::ACCESS_READ).data, 640, 480);
-        //view2.showGrayscale(binImg.getMat(cv::ACCESS_READ).data, 640, 480);
-        
-        VerticalThinningAlgorithm algo = VerticalThinningAlgorithm(img2);
-        algo.compute();
-        std::vector<float> result = algo.getResult();
         
 //        std::ostringstream oss;
 //        
@@ -85,9 +95,6 @@ int main(int argc, const char * argv[]) {
     }
     
     
-    
-    // SDL quit
-    //SDL_Quit();
     return 0;
 }
 
