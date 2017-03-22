@@ -37,9 +37,9 @@ struct ParallelVerticalThinning : public cv::ParallelLoopBody {
             
             float avgPosition = 0;
             unsigned int avgCount = 0;
-            while (j < _ySize) {
+            while (j*_stepSize < _ySize) {
                 while (start[j*_stepSize] == 0) {
-                    if (j*_stepSize >= (_ySize-1)) {
+                    if (j*_stepSize >= (_ySize-_stepSize)) {
                         break;
                     } else {
                         j++;

@@ -29,6 +29,14 @@ public:
     void correctImage(cv::InputArray &input, cv::OutputArray &output);
     void setAlpha(double alpha);
     
+    // MARK: Updated calibration procedure
+    void beginCalibration(int boardNumOfSquaresInWidth, int boardNumOfSquaresInHeight, float squareSizeInM, cv::Size imageSize);
+    bool checkOneFrame(cv::InputOutputArray &inputOutput);
+    //void getLastValidFrame(cv::OutputArray &output);
+    void useLastValidFrameForCalibration();
+    void finalizeCalibration();
+    
+    
 };
 
 #endif /* CalibratedDevice_hpp */

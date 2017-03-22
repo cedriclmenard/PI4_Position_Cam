@@ -34,7 +34,7 @@ class SettingsView {
 public:
     SettingsView(std::string windowName, int x, int y, int w, int h, int* bracketValue);
     ~SettingsView();
-    void runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigned char* grayscale, int w, int h, const char* text, std::vector<float> data);
+    void runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigned char* grayscale, int w, int h, const char* text, std::vector<float> &data);
     void showNextFrame();
     void hideNextFrame();
     bool hasEnded();

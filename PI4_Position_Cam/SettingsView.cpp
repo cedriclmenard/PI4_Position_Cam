@@ -8,11 +8,124 @@
 
 #include "SettingsView.hpp"
 
+
+// MARK: GUI style variables
 ImVec4 clearColor = ImColor(255,255,255);
 ImVec4 titleBarColor = ImColor(150,150,150);
 ImVec4 titleBarColorDark = ImColor(90,90,90);
 ImVec4 closeButtonLight = ImColor(180,50,50);
 ImVec4 closeButtonDark = ImColor(130,80,80);
+
+// MARK: Currently shown windows variable
+bool show_settings_window = true;
+bool show_initial_image_window = true;
+bool show_binary_image_window = true;
+bool show_next_file_popup = false;
+
+// MARK: State variables
+bool filesystemWasSet = false;
+
+// MARK: File system variables
+std::string basePath;
+std::vector<std::string> files;
+
+// MARK: Other file global variables
+std::string calibrationFilePath;
+
+// MARK: Other functions
+void setFileSystem(std::string fileExt) {
+    basePath = SDL_GetBasePath();
+    GetFilesInDirectory(files, basePath, fileExt);
+    filesystemWasSet = true;
+}
+
+void setFilesToPath(std::string path, std::string fileExt) {
+    GetFilesInDirectory(files, path, fileExt);
+}
+
+//bool getFileIdxInFiles(void* data, int idx, const char** outText) {
+//    std::vector<std::string> _files = *((std::vector<std::string>*) data);
+//    *outText = _files.at(idx).c_str();
+//    return true;
+//}
+
+void fileSelection() {
+    static int selectedIdx = -1;
+    show_next_file_popup = false;
+    if (!filesystemWasSet) setFileSystem("");
+    if (ImGui::BeginPopupModal("fileselection")) {
+        static bool firstTime = true;
+        static char buf[500];
+        if (firstTime) {
+            firstTime = false;
+            basePath.copy(buf, 500);
+        }
+        
+        if (ImGui::InputText("Filepath", buf, 500, ImGuiInputTextFlags_EnterReturnsTrue)) {
+            //basePath = buf;
+            files.clear();
+            setFilesToPath(buf, "");
+        }
+        ImGui::ListBoxHeader("Files");//, ImGui::GetItemRectSize());
+        for (auto iter = files.begin(); iter < files.end(); iter++) {
+            if (ImGui::Selectable(iter->c_str(), (iter - files.begin()) == selectedIdx)) {
+                selectedIdx = iter - files.begin();
+            }
+        }
+        ImGui::ListBoxFooter();
+        ImGui::EndPopup();
+    }
+}
+
+// MARK: Windows
+
+void showSettingsWindow(std::vector<float> &data, int* bracketValue) {
+    ImGui::Begin("Settings", &show_settings_window);
+    ImGui::Text("This is a test");
+    ImGui::SliderInt("Color bracket", bracketValue, 1, 150);
+    //ImGui::TextWrapped("%s", text);
+    ImGui::PlotLines("Detected Lines", data.data(), data.size());
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::End();
+}
+
+void showInitialImageWindow(unsigned char* bgr, int w, int h, void (*_mouseCallbackOnBGRImage)(int x, int y, void* userData), void *_mouseCallbackOnBGRImageUserData) {
+    ImGui::SetNextWindowPos(ImVec2(300, 20), ImGuiSetCond_Once);
+    ImGui::Begin("Initial Image", &show_initial_image_window, ImVec2(0,0), -1.0f, ImGuiWindowFlags_NoResize);
+    //ImGui::Begin("Initial Image", &showInitialImage);
+    ImTextureID tex = (ImTextureID)bgrImageToTexture(bgr, w, h);
+    ImGui::Image(tex, ImVec2(w,h));
+    if (ImGui::IsItemClicked()) {
+        if (_mouseCallbackOnBGRImage != NULL) {
+            int x, y;
+            x = ImGui::GetMousePos().x - ImGui::GetWindowPos().x - ImGui::GetWindowContentRegionMin().x;
+            y = ImGui::GetMousePos().y - ImGui::GetWindowPos().y - ImGui::GetWindowContentRegionMin().y;
+            x = x > w ? w : x;
+            y = y > h ? h : y;
+            std::cout << "Mouse x = " << x << ", Mouse y = " << y << std::endl;
+            _mouseCallbackOnBGRImage(x, y, _mouseCallbackOnBGRImageUserData);
+        }
+        
+        
+    }
+    ImGui::End();
+
+}
+
+void showBinaryImageWindow(unsigned char* grayscale, int w, int h) {
+    ImGui::SetNextWindowPos(ImVec2(600, 20), ImGuiSetCond_Once);
+    ImGui::Begin("Binary Image", &show_binary_image_window, ImVec2(0,0), -1.0f, ImGuiWindowFlags_NoResize);
+    ImTextureID tex = (ImTextureID)grayscaleImageToTexture(grayscale, w, h);
+    ImGui::Image(tex, ImVec2(w,h));
+    ImGui::End();
+}
+
+void showMenuFile() {
+    if (ImGui::MenuItem("Load Calibration Data")) {
+        show_next_file_popup = true;
+    }
+}
+
 
 SettingsView::SettingsView(std::string windowName, int x, int y, int w, int h, int* bracketValue) :
 _windowName(windowName), _bracketValue(bracketValue)
@@ -41,11 +154,11 @@ SettingsView::~SettingsView() {
     QuitSDLOGLForViews();
 }
 
-void SettingsView::runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigned char* grayscale, int w, int h, const char* text, std::vector<float> data) {
+void SettingsView::runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigned char* grayscale, int w, int h, const char* text, std::vector<float> &data) {
     // This is the main loop for rendering this window
-    static bool showSettings = true;
-    static bool showInitialImage = true;
-    static bool showBinaryImage = true;
+//    static bool showSettings = true;
+//    static bool showInitialImage = true;
+//    static bool showBinaryImage = true;
     
     if (_toShow) {
         
@@ -56,48 +169,29 @@ void SettingsView::runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigne
         ImGui_ImplSdl_ProcessEvent(&event);
         ImGui_ImplSdl_NewFrame(_window);
         
+        // Menu bar
+        if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                showMenuFile();
+                ImGui::EndMenu();
+            }
+            
+            ImGui::EndMainMenuBar();
+        }
         
         
         // MARK: Window processing
-        {
-            ImGui::Begin("Settings", &showSettings);
-            ImGui::Text("This is a test");
-            ImGui::SliderInt("Color bracket", _bracketValue, 1, 150);
-            //ImGui::TextWrapped("%s", text);
-            ImGui::PlotLines("Detected Lines", data.data(), data.size());
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
         
-        {
-            ImGui::SetNextWindowPos(ImVec2(300, 20), ImGuiSetCond_Once);
-            ImGui::Begin("Initial Image", &showInitialImage, ImVec2(0,0), -1.0f, ImGuiWindowFlags_NoResize);
-            //ImGui::Begin("Initial Image", &showInitialImage);
-            ImTextureID tex = (ImTextureID)bgrImageToTexture(bgr, w, h);
-            ImGui::Image(tex, ImVec2(w,h));
-            if (ImGui::IsItemClicked()) {
-                if (_mouseCallbackOnBGRImage != NULL) {
-                    int x, y;
-                    x = ImGui::GetMousePos().x - ImGui::GetWindowPos().x - ImGui::GetWindowContentRegionMin().x;
-                    y = ImGui::GetMousePos().y - ImGui::GetWindowPos().y - ImGui::GetWindowContentRegionMin().y;
-                    x = x > w ? w : x;
-                    y = y > h ? h : y;
-                    std::cout << "Mouse x = " << x << ", Mouse y = " << y << std::endl;
-                    _mouseCallbackOnBGRImage(x, y, _mouseCallbackOnBGRImageUserData);
-                }
-                
-                
-            }
-            ImGui::End();
-        }
-        {
-            ImGui::SetNextWindowPos(ImVec2(600, 20), ImGuiSetCond_Once);
-            ImGui::Begin("Binary Image", &showBinaryImage, ImVec2(0,0), -1.0f, ImGuiWindowFlags_NoResize);
-            ImTextureID tex = (ImTextureID)grayscaleImageToTexture(grayscale, w, h);
-            ImGui::Image(tex, ImVec2(w,h));
-            ImGui::End();
-        }
+        if (show_settings_window) showSettingsWindow(data, _bracketValue);
         
+        if (show_initial_image_window) showInitialImageWindow(bgr, w, h, _mouseCallbackOnBGRImage, _mouseCallbackOnBGRImageUserData);
+
+        if (show_binary_image_window) showBinaryImageWindow(grayscale, w, h);
+        
+        if (show_next_file_popup) {
+            ImGui::OpenPopup("fileselection");
+        }
+        fileSelection();
         
         
         // MARK: Rendering

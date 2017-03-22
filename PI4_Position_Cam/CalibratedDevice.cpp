@@ -141,3 +141,60 @@ void CalibratedDevice<VideoDevice>::getImage(cv::OutputArray img) {
     _dev >> _img;
     correctImage(_img,img);
 }
+
+// MARK: Updated calibration procedure
+struct CalibrationData {
+    cv::Size boardSize;
+    std::vector<std::vector<cv::Point3f> > objectPoints;
+    std::vector<std::vector<cv::Point2f> > imagePoints;
+    std::vector<cv::Point2f> corners;
+    std::vector<cv::Point3f> obj;
+    cv::Size imageSize;
+} calibrationData;
+
+template<class VideoDevice>
+void CalibratedDevice<VideoDevice>::beginCalibration(int boardNumOfSquaresInWidth, int boardNumOfSquaresInHeight, float squareSizeInM, cv::Size imageSize) {
+    calibrationData.boardSize = cv::Size(boardNumOfSquaresInWidth, boardNumOfSquaresInHeight);
+    calibrationData.obj = Create3DChessboardCorners(calibrationData.boardSize, squareSizeInM);
+    calibrationData.imageSize = imageSize;
+}
+
+template<class VideoDevice>
+bool CalibratedDevice<VideoDevice>::checkOneFrame(cv::InputOutputArray &input) {
+    cv::Mat gray;
+    cv::cvtColor(input, gray, CV_BGR2GRAY);
+    
+    bool found = cv::findChessboardCorners(input, calibrationData.boardSize, calibrationData.corners, cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_FILTER_QUADS | cv::CALIB_CB_NORMALIZE_IMAGE);
+    
+    if (found)
+    {
+        cv::cornerSubPix(gray, calibrationData.corners, cv::Size(11, 11), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
+        cv::drawChessboardCorners(input, calibrationData.boardSize, calibrationData.corners, found);
+    }
+    return found;
+}
+
+//template<class VideoDevice>
+//void CalibratedDevice<VideoDevice>::getLastValidFrame(cv::OutputArray &output) {
+//    
+//}
+
+template<class VideoDevice>
+void CalibratedDevice<VideoDevice>::useLastValidFrameForCalibration() {
+    calibrationData.imagePoints.push_back(calibrationData.corners);
+    calibrationData.objectPoints.push_back(calibrationData.obj);
+}
+
+template<class VideoDevice>
+void CalibratedDevice<VideoDevice>::finalizeCalibration() {
+    _CM = cv::Mat(3, 3, CV_64FC1);
+    
+    // MARK: Calibrate Camera
+    calibrateCamera(calibrationData.objectPoints, calibrationData.imagePoints, calibrationData.imageSize, _CM, _D, _R, _T, CV_CALIB_RATIONAL_MODEL);
+    
+    // Get distortion correction map for speed
+    cv::initUndistortRectifyMap(_CM, _D, cv::Mat(),
+                                cv::getOptimalNewCameraMatrix(_CM, _D, calibrationData.imageSize, 1, calibrationData.imageSize, 0),
+                                calibrationData.imageSize, CV_16SC2, _map1, _map2);
+}
+

@@ -13,7 +13,9 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-
+#include <vector>
+#include "dirent.h"
+#include <sys/stat.h>
 
 /**
  Safe initialize SDL and OGL
@@ -30,6 +32,7 @@ GLuint bgrImageToTexture(unsigned char *bgr, unsigned int width, unsigned int he
 
 GLuint grayscaleImageToTexture(unsigned char *gray, unsigned int width, unsigned int height);
 
+void GetFilesInDirectory(std::vector<std::string> &out, const std::string &directory, const std::string fileExt = "");
 
 
 #endif /* Views_hpp */
