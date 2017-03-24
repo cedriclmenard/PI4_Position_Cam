@@ -37,7 +37,9 @@
 		82205A901E575639009555DC /* libopencv_ximgproc.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82205A7B1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */; };
 		823B485E1E7B6602009AA735 /* BaseVideoDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */; };
 		82B24E8D1E7E229A006FAB12 /* imgui_impl_sdl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B24E8B1E7E229A006FAB12 /* imgui_impl_sdl.cpp */; };
-		82B24E901E7E2333006FAB12 /* VerticalThinningAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B24E8E1E7E2333006FAB12 /* VerticalThinningAlgorithm.cpp */; };
+		82B24E901E7E2333006FAB12 /* HorizontalThinningAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B24E8E1E7E2333006FAB12 /* HorizontalThinningAlgorithm.cpp */; };
+		82F822461E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F822441E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib */; };
+		82F822471E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F822451E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib */; };
 		82FF15A41E804A6600E5AB5B /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82FF15A31E804A6600E5AB5B /* OpenGL.framework */; };
 		82FF15AE1E804CE000E5AB5B /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82FF15A61E804CE000E5AB5B /* imgui_demo.cpp */; };
 		82FF15AF1E804CE000E5AB5B /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82FF15A71E804CE000E5AB5B /* imgui_draw.cpp */; };
@@ -98,8 +100,11 @@
 		823B485D1E7B6602009AA735 /* BaseVideoDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseVideoDevice.hpp; sourceTree = "<group>"; };
 		82B24E8B1E7E229A006FAB12 /* imgui_impl_sdl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_impl_sdl.cpp; sourceTree = "<group>"; };
 		82B24E8C1E7E229A006FAB12 /* imgui_impl_sdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui_impl_sdl.h; sourceTree = "<group>"; };
-		82B24E8E1E7E2333006FAB12 /* VerticalThinningAlgorithm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VerticalThinningAlgorithm.cpp; sourceTree = "<group>"; };
-		82B24E8F1E7E2333006FAB12 /* VerticalThinningAlgorithm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VerticalThinningAlgorithm.hpp; sourceTree = "<group>"; };
+		82B24E8E1E7E2333006FAB12 /* HorizontalThinningAlgorithm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HorizontalThinningAlgorithm.cpp; sourceTree = "<group>"; };
+		82B24E8F1E7E2333006FAB12 /* HorizontalThinningAlgorithm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HorizontalThinningAlgorithm.hpp; sourceTree = "<group>"; };
+		82F822431E82FD7600C32A08 /* Fonts.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Fonts.hpp; sourceTree = "<group>"; };
+		82F822441E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_calib3d.3.1.0.dylib; path = ../../../../../usr/local/lib/libopencv_calib3d.3.1.0.dylib; sourceTree = "<group>"; };
+		82F822451E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_calib3d.3.1.0.dylib; path = ../../../../../usr/local/lib/libopencv_calib3d.3.1.0.dylib; sourceTree = "<group>"; };
 		82FF15A31E804A6600E5AB5B /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		82FF15A51E804CE000E5AB5B /* imconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imconfig.h; sourceTree = "<group>"; };
 		82FF15A61E804CE000E5AB5B /* imgui_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_demo.cpp; sourceTree = "<group>"; };
@@ -121,6 +126,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82F822461E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib in Frameworks */,
+				82F822471E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib in Frameworks */,
 				82FF15A41E804A6600E5AB5B /* OpenGL.framework in Frameworks */,
 				820470C51E5E811800486806 /* SDL2.framework in Frameworks */,
 				82205A7C1E575639009555DC /* libopencv_ccalib.3.1.0.dylib in Frameworks */,
@@ -177,6 +184,7 @@
 				82FF15B31E804D2400E5AB5B /* Image Processing */,
 				82FF15B41E80515600E5AB5B /* Views */,
 				82205A3C1E575367009555DC /* main.cpp */,
+				82F822431E82FD7600C32A08 /* Fonts.hpp */,
 				820470C11E5CA58E00486806 /* CalibratedDevice.cpp */,
 				820470C21E5CA58E00486806 /* CalibratedDevice.hpp */,
 				823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */,
@@ -193,6 +201,8 @@
 		82205A641E5755F3009555DC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				82F822441E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib */,
+				82F822451E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib */,
 				82FF15A31E804A6600E5AB5B /* OpenGL.framework */,
 				820470C41E5E811800486806 /* SDL2.framework */,
 				82205A671E575639009555DC /* libopencv_ccalib.3.1.0.dylib */,
@@ -249,8 +259,8 @@
 		82FF15B31E804D2400E5AB5B /* Image Processing */ = {
 			isa = PBXGroup;
 			children = (
-				82B24E8E1E7E2333006FAB12 /* VerticalThinningAlgorithm.cpp */,
-				82B24E8F1E7E2333006FAB12 /* VerticalThinningAlgorithm.hpp */,
+				82B24E8E1E7E2333006FAB12 /* HorizontalThinningAlgorithm.cpp */,
+				82B24E8F1E7E2333006FAB12 /* HorizontalThinningAlgorithm.hpp */,
 			);
 			name = "Image Processing";
 			sourceTree = "<group>";
@@ -344,7 +354,7 @@
 				82FF15B01E804CE000E5AB5B /* imgui.cpp in Sources */,
 				820470C81E5E81EC00486806 /* ImageView.cpp in Sources */,
 				823B485E1E7B6602009AA735 /* BaseVideoDevice.cpp in Sources */,
-				82B24E901E7E2333006FAB12 /* VerticalThinningAlgorithm.cpp in Sources */,
+				82B24E901E7E2333006FAB12 /* HorizontalThinningAlgorithm.cpp in Sources */,
 				820470C01E59437800486806 /* PSEyeOCVVideoDevice.cpp in Sources */,
 				82FF15AE1E804CE000E5AB5B /* imgui_demo.cpp in Sources */,
 			);

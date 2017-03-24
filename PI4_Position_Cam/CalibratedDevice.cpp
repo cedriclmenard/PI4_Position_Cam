@@ -132,7 +132,7 @@ void CalibratedDevice<VideoDevice>::loadParameters(std::string filename){
 }
 
 template<class VideoDevice>
-void CalibratedDevice<VideoDevice>::correctImage(cv::InputArray &input, cv::OutputArray &output){
+void CalibratedDevice<VideoDevice>::correctImage(cv::InputArray input, cv::OutputArray output){
     cv::remap(input, output, _map1, _map2, cv::INTER_LINEAR);
 }
 
@@ -171,11 +171,14 @@ void CalibratedDevice<VideoDevice>::beginCalibration(int boardNumOfSquaresInWidt
 }
 
 template<class VideoDevice>
-bool CalibratedDevice<VideoDevice>::checkOneFrame(cv::InputOutputArray &input) {
+bool CalibratedDevice<VideoDevice>::checkOneFrame(cv::InputOutputArray input) {
+    if (input.empty()) {
+        return false;
+    }
     cv::Mat gray;
     cv::cvtColor(input, gray, CV_BGR2GRAY);
     
-    bool found = cv::findChessboardCorners(input, calibrationData.boardSize, calibrationData.corners, cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_FILTER_QUADS | cv::CALIB_CB_NORMALIZE_IMAGE);
+    bool found = cv::findChessboardCorners(gray, calibrationData.boardSize, calibrationData.corners, cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_FILTER_QUADS | cv::CALIB_CB_NORMALIZE_IMAGE);
     
     if (found)
     {
@@ -209,6 +212,14 @@ void CalibratedDevice<VideoDevice>::finalizeCalibration() {
                                 calibrationData.imageSize, CV_16SC2, _map1, _map2);
     isCalibrated = true;
 }
+
+
+template<class VideoDevice>
+bool CalibratedDevice<VideoDevice>::checkIfCalibrated() {
+    return isCalibrated;
+}
+
+
 
 
 // MARK: Used template instantiation

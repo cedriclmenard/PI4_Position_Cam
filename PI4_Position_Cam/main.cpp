@@ -14,8 +14,8 @@
 #include "opencv2/imgproc.hpp"
 #include "SDL2/SDL.h"
 #include "SettingsView.hpp"
-#include "VerticalThinningAlgorithm.hpp"
-//#include "CalibratedDevice.hpp"
+#include "HorizontalThinningAlgorithm.hpp"
+#include "CalibratedDevice.hpp"
 
 cv::Vec3b centerColor = cv::Vec3b(155,155,155);
 
@@ -25,6 +25,18 @@ void mouseCallback(int x, int y, void* userData) {
     std::cout << "BGR is : " << +centerColor[0] << ", " << +centerColor[1] << ", " << +centerColor[2] << std::endl;
 }
 
+void loadCalibrationCallback(std::string* filePath, void* userData) {
+    CalibratedDevice<PSEyeOCVVideoDevice>* calibDev = (CalibratedDevice<PSEyeOCVVideoDevice>*) userData;
+    (*calibDev).loadParameters(*filePath);
+}
+void saveCalibrationCallback(std::string* filePath, void* userData) {
+    CalibratedDevice<PSEyeOCVVideoDevice>* calibDev = (CalibratedDevice<PSEyeOCVVideoDevice>*) userData;
+    if ((*calibDev).checkIfCalibrated() ) {
+        (*calibDev).saveParameters(*filePath);
+    }
+    std::cout << "Unable to save, not calibrated" << std::endl;
+}
+
 int main(int argc, const char * argv[]) {
     
         
@@ -32,12 +44,11 @@ int main(int argc, const char * argv[]) {
     
     // Setup input device
     //PSEyeOCVVideoDevice dev = PSEyeOCVVideoDevice(0);
-    PSEyeOCVVideoDevice dev = PSEyeOCVVideoDevice();
-    //CalibratedDevice<PSEyeOCVVideoDevice> calibDev(dev);
+    static PSEyeOCVVideoDevice dev = PSEyeOCVVideoDevice();
+    static CalibratedDevice<PSEyeOCVVideoDevice> calibDev(dev);
     cv::UMat img;
     cv::UMat binImg;
-    //dev.setExposure(150);
-    //dev.setGain(63);
+    
     
     //ImageView view = ImageView("test", 100, 100, 640, 480);
     //ImageView view2 = ImageView("test Binary",100,580,640,480);
@@ -45,26 +56,41 @@ int main(int argc, const char * argv[]) {
     int bracketSize = 20;
     SettingsView settView = SettingsView("This is a test", 0, 0, 1280, 720, &bracketSize);
     settView.setMouseCallbackOnBGRImage(mouseCallback, &img);
+    settView.setLoadCalibrationCallback(loadCalibrationCallback,&calibDev);
+    settView.setSaveCalibrationCallback(saveCalibrationCallback,&calibDev);
     
-    void* imgData = NULL;
-    void* binData = NULL;
+    unsigned char* imgData = NULL;
+    unsigned char* binData = NULL;
     std::vector<float> result;
+    bool cameraNotSet = true;
+    size_t numberOfAvailableDevices = 0;
+    
+    bool isCalibrating = false;
     
     
     
     while (!settView.hasEnded()) {
-        if (PSEyeOCVVideoDevice::getNumberOfAvailableDevices() != 0) {
+        if (cameraNotSet) {
+            numberOfAvailableDevices = PSEyeOCVVideoDevice::getNumberOfAvailableDevices();
+        }
+        if (numberOfAvailableDevices != 0 && !isCalibrating) {
+            if (cameraNotSet) cameraNotSet = false;
             dev.setDeviceIndexNotInit(0);
+            //dev.setExposure(150);
+            //dev.setGain(63);
+            dev.cam->setAutogain(true);
+            dev.cam->setExposure(150);
+            
             dev >> img;
             cv::medianBlur(img, img, 7);
             cv::inRange(img, centerColor - cv::Vec3b(bracketSize,bracketSize,bracketSize), centerColor + cv::Vec3b(bracketSize,bracketSize,bracketSize), binImg);
             //cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
-            cv::morphologyEx(binImg, binImg, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(10,10)));
+            cv::morphologyEx(binImg, binImg, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(21,21)));
             cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
             
             
             
-            VerticalThinningAlgorithm algo = VerticalThinningAlgorithm(img2);
+            HorizontalThinningAlgorithm algo = HorizontalThinningAlgorithm(img2);
             algo.compute();
             result = algo.getResult();
             imgData = img.getMat(cv::ACCESS_READ).data;
@@ -86,10 +112,10 @@ int main(int argc, const char * argv[]) {
 //        
 //        const char* str = oss.str().c_str();
         
-        SDL_Event e;
-        SDL_PollEvent(&e);
+        //SDL_Event e;
+        //SDL_PollEvent(&e);
         //settView.runForThisFrame(e, img.getMat(cv::ACCESS_READ).data, binImg.getMat(cv::ACCESS_READ).data, 640, 480);
-        settView.runForThisFrame(e, img.getMat(cv::ACCESS_READ).data, binImg.getMat(cv::ACCESS_READ).data, 640, 480, "", result);
+        settView.runForThisFrame(imgData, binData, 640, 480, "", result, calibDev, isCalibrating);
         
         
     }

@@ -133,7 +133,12 @@ bool ImGui_ImplSdl_ProcessEvent(SDL_Event* event)
         }
     case SDL_TEXTINPUT:
         {
-            io.AddInputCharactersUTF8(event->text.text);
+            static unsigned int prevTimestamp = 0;
+            if (event->text.timestamp != prevTimestamp) {
+                io.AddInputCharactersUTF8(event->text.text);
+            }
+            //io.AddInputCharactersUTF8(event->text.text);
+            prevTimestamp = event->text.timestamp;
             return true;
         }
     case SDL_KEYDOWN:
@@ -215,6 +220,9 @@ bool    ImGui_ImplSdl_Init(SDL_Window* window)
     io.SetClipboardTextFn = ImGui_ImplSdl_SetClipboardText;
     io.GetClipboardTextFn = ImGui_ImplSdl_GetClipboardText;
     io.ClipboardUserData = NULL;
+    
+    io.KeyRepeatDelay = 0.25;
+    io.KeyRepeatRate = 0.05;
 
 #ifdef _WIN32
     SDL_SysWMinfo wmInfo;

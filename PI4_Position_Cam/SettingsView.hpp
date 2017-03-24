@@ -17,6 +17,9 @@
 #include <SDL2/SDL_opengl.h>
 #include "Views.hpp"
 #include <vector>
+#include "CalibratedDevice.hpp"
+#include "PSEyeOCVVideoDevice.hpp"
+#include "opencv2/core/core.hpp"
 
 class SettingsView {
     SDL_DisplayMode _displayMode;
@@ -38,7 +41,7 @@ class SettingsView {
 public:
     SettingsView(std::string windowName, int x, int y, int w, int h, int* bracketValue);
     ~SettingsView();
-    void runForThisFrame(SDL_Event &event, unsigned char* bgr, unsigned char* grayscale, int w, int h, const char* text, std::vector<float> &data);
+    void runForThisFrame(unsigned char* bgr, unsigned char* grayscale, int w, int h, const char* text, std::vector<float> &data, CalibratedDevice<PSEyeOCVVideoDevice> &_dev, bool &isCalibrating);
     void showNextFrame();
     void hideNextFrame();
     bool hasEnded();

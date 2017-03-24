@@ -32,6 +32,8 @@ GLuint bgrImageToTexture(unsigned char *bgr, unsigned int width, unsigned int he
 
 GLuint grayscaleImageToTexture(unsigned char *gray, unsigned int width, unsigned int height);
 
+GLuint singleColorRGBAToTexture(uint32_t rgba);
+
 void GetFilesInDirectory(std::vector<std::string> &out, const std::string &directory, const std::string fileExt = "");
 
 

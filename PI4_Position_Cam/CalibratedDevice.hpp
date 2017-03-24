@@ -10,7 +10,7 @@
 #define CalibratedDevice_hpp
 
 #include <stdio.h>
-#include "opencv2/opencv.hpp"
+#include "opencv2/core/core.hpp"
 #include "ImageView.hpp"
 #include "BaseVideoDevice.hpp"
 #include "PSEyeOCVVideoDevice.hpp"
@@ -18,7 +18,7 @@
 
 template <class VideoDevice>
 class CalibratedDevice : public BaseVideoDevice {
-    VideoDevice _dev;
+    VideoDevice& _dev;
     cv::Mat _CM, _D, _R, _T, _map1, _map2;
     double _alpha = 0;
     virtual void getImage(cv::OutputArray img) override;
@@ -29,15 +29,16 @@ public:
     void calibrate(ImageView &view, unsigned int numberOfFrames, int boardNumOfSquaresInWidth, int boardNumOfSquaresInHeight, float squareSizeInM);
     void saveParameters(std::string filename);
     void loadParameters(std::string filename);
-    void correctImage(cv::InputArray &input, cv::OutputArray &output);
+    void correctImage(cv::InputArray input, cv::OutputArray output);
     void setAlpha(double alpha);
     
     // MARK: Updated calibration procedure
     void beginCalibration(int boardNumOfSquaresInWidth, int boardNumOfSquaresInHeight, float squareSizeInM, cv::Size imageSize);
-    bool checkOneFrame(cv::InputOutputArray &inputOutput);
+    bool checkOneFrame(cv::InputOutputArray inputOutput);
     //void getLastValidFrame(cv::OutputArray &output);
     void useLastValidFrameForCalibration();
     void finalizeCalibration();
+    bool checkIfCalibrated();
     
     
 };

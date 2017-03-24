@@ -32,9 +32,9 @@ public:
     bool setDeviceIndexNotInit(unsigned int deviceIndex);
     
     static unsigned int getNumberOfAvailableDevices();
-    
-private:
     ps3eye::PS3EYECam::PS3EYERef cam;
+private:
+    
     cv::Mat lastFrame;
     friend PSEyeOCVVideoDevice &operator>>(PSEyeOCVVideoDevice &input, cv::InputOutputArray &output);
     bool camWasInit = false;

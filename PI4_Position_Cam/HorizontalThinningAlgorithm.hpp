@@ -1,18 +1,18 @@
 //
-//  VerticalThinningAlgorithm.hpp
+//  HorizontalThinningAlgorithm.hpp
 //  PI4_Position_Cam
 //
 //  Created by Cedric Leblond Menard on 17-03-18.
 //  Copyright © 2017 AER4875. All rights reserved.
 //
 
-#ifndef VerticalThinningAlgorithm_hpp
-#define VerticalThinningAlgorithm_hpp
+#ifndef HorizontalThinningAlgorithm_hpp
+#define HorizontalThinningAlgorithm_hpp
 
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 
-class VerticalThinningAlgorithm {
+class HorizontalThinningAlgorithm {
     cv::Mat _img;
     cv::Mat _returnImg;
     bool isComputed = false;
@@ -20,9 +20,9 @@ class VerticalThinningAlgorithm {
     std::vector<float> _points;
     
 public:
-    VerticalThinningAlgorithm(cv::Mat &binImg);
+    HorizontalThinningAlgorithm(cv::Mat binImg);
     void compute();
     std::vector<float> getResult();
 };
 
-#endif /* VerticalThinningAlgorithm_hpp */
+#endif /* HorizontalThinningAlgorithm_hpp */
