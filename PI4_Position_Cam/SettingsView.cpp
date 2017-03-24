@@ -220,7 +220,7 @@ void showInitialImageWindow(unsigned char* bgr, int w, int h, void (*_mouseCallb
         
     }
     ImGui::End();
-
+    
 }
 
 void showBinaryImageWindow(unsigned char* grayscale, int w, int h) {
@@ -267,9 +267,9 @@ _windowName(windowName), _bracketValue(bracketValue)
     
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
-//    static ImFontConfig config = ImFontConfig::ImFontConfig();
-//    config.OversampleH = 8;
-//    config.OversampleV = 1;
+    //    static ImFontConfig config = ImFontConfig::ImFontConfig();
+    //    config.OversampleH = 8;
+    //    config.OversampleV = 1;
     io.Fonts->AddFontFromMemoryCompressedTTF(font_cousine_regular_compressed_data, font_cousine_regular_compressed_size, 15.0f);
     //ImGui::PushFont(font);
     io.FontDefault = io.Fonts->Fonts[1];
@@ -288,6 +288,8 @@ SettingsView::~SettingsView() {
 void SettingsView::runForThisFrame(unsigned char* bgr, unsigned char* grayscale, int w, int h, const char* text, std::vector<float> &data, CalibratedDevice<PSEyeOCVVideoDevice> &dev, bool &isCalibrating) {
     SDL_Event event;
     SDL_PollEvent(&event);
+    ImGui_ImplSdl_ProcessEvent(&event);
+    ImGui_ImplSdl_NewFrame(_window);
     
     // MARK: Event processing
     if (event.type == SDL_QUIT) {
@@ -295,119 +297,118 @@ void SettingsView::runForThisFrame(unsigned char* bgr, unsigned char* grayscale,
         return;
     }
     
-    if (_toShow) {
+    
+    
+    
+    
+    // Menu bar
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+            showMenuFile();
+            ImGui::EndMenu();
+        }
         
-        ImGui_ImplSdl_ProcessEvent(&event);
-        ImGui_ImplSdl_NewFrame(_window);
+        ImGui::EndMainMenuBar();
+    }
+    
+    
+    // MARK: Window processing
+    if (!mode_calibration) {
+        
+        static ImGuiStyle style = ImGui::GetStyle();
+        ImGui::ShowStyleEditor(&style);
+        if (show_settings_window) showSettingsWindow(data, _bracketValue, isCalibrating, dev);
+        
+        if (show_initial_image_window && bgr != NULL) showInitialImageWindow(bgr, w, h, _mouseCallbackOnBGRImage, _mouseCallbackOnBGRImageUserData);
+        
+        if (show_binary_image_window && grayscale != NULL) showBinaryImageWindow(grayscale, w, h);
         
         
-        // Menu bar
-        if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                showMenuFile();
-                ImGui::EndMenu();
-            }
-            
-            ImGui::EndMainMenuBar();
+        
+        if (show_load_file_popup) {
+            ImGui::OpenPopup("fileselection");
+            show_load_file_popup = false;
+        }
+        if (show_save_file_popup) {
+            ImGui::OpenPopup("filesave");
+            show_save_file_popup = false;
         }
         
         
-        // MARK: Window processing
-        if (!mode_calibration) {
-            
-            static ImGuiStyle style = ImGui::GetStyle();
-            ImGui::ShowStyleEditor(&style);
-            if (show_settings_window) showSettingsWindow(data, _bracketValue, isCalibrating, dev);
-            
-            if (show_initial_image_window && bgr != NULL) showInitialImageWindow(bgr, w, h, _mouseCallbackOnBGRImage, _mouseCallbackOnBGRImageUserData);
-            
-            if (show_binary_image_window && grayscale != NULL) showBinaryImageWindow(grayscale, w, h);
-            
-            
-            
-            if (show_load_file_popup) {
-                ImGui::OpenPopup("fileselection");
-                show_load_file_popup = false;
+        fileSelection(_loadCalibration, _loadCalibrationUserData);
+        fileSave(_saveCalibration, _saveCalibrationUserData);
+        
+        
+    } else {
+        
+        // MARK: Calibration procedure
+        static cv::Mat calibImg;
+        static bool nextFrame = false;
+        static bool lastFrameIsValid = false;
+        static unsigned int numOfFrames = 0;
+        
+        ImGui::Begin("Calibration Image", NULL, ImGuiWindowFlags_NoResize);
+        
+        if (ImGui::Button("Cancel")) {
+            mode_calibration = false;
+        }
+        
+        if (!calibImg.empty()) {
+            ImTextureID tex = (ImTextureID) bgrImageToTexture(calibImg.data, calibImg.size[1], calibImg.size[0]);
+            ImGui::Image(tex, ImVec2(w,h));
+        } else {
+            // Renders black texture, clip to edges
+            ImTextureID tex = (ImTextureID) singleColorRGBAToTexture(0x000000FF);
+            ImGui::Image(tex,ImVec2(w,h));
+        }
+        ImGui::Text("Number of valid frames kept for calibration : %u", numOfFrames);
+        if (!lastFrameIsValid) {
+            if (!dev.checkOneFrame(calibImg)) {
+                dev >> calibImg;
+            } else {
+                lastFrameIsValid = true;
             }
-            if (show_save_file_popup) {
-                ImGui::OpenPopup("filesave");
-                show_save_file_popup = false;
-            }
-            
-            
-            fileSelection(_loadCalibration, _loadCalibrationUserData);
-            fileSave(_saveCalibration, _saveCalibrationUserData);
-            
-
         } else {
             
-            // MARK: Calibration procedure
-            static cv::Mat calibImg;
-            static bool nextFrame = false;
-            static bool lastFrameIsValid = false;
-            static unsigned int numOfFrames = 0;
-            
-            ImGui::Begin("Calibration Image", NULL, ImGuiWindowFlags_NoResize);
-            
-            if (ImGui::Button("Cancel")) {
-                mode_calibration = false;
+            if (ImGui::Button("Keep")) {
+                dev.useLastValidFrameForCalibration();
+                lastFrameIsValid = false;
+                numOfFrames++;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Discard")) {
+                lastFrameIsValid = false;
             }
             
-            if (!calibImg.empty()) {
-                ImTextureID tex = (ImTextureID) bgrImageToTexture(calibImg.data, calibImg.size[1], calibImg.size[0]);
-                ImGui::Image(tex, ImVec2(w,h));
-            } else {
-                // Renders black texture, clip to edges
-                ImTextureID tex = (ImTextureID) singleColorRGBAToTexture(0x000000FF);
-                ImGui::Image(tex,ImVec2(w,h));
-            }
-            ImGui::Text("Number of valid frames kept for calibration : %u", numOfFrames);
-            if (!lastFrameIsValid) {
-                if (!dev.checkOneFrame(calibImg)) {
-                    dev >> calibImg;
-                } else {
-                    lastFrameIsValid = true;
-                }
-            } else {
-
-                if (ImGui::Button("Keep")) {
-                    dev.useLastValidFrameForCalibration();
-                    
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Discard")) {
-                    lastFrameIsValid = false;
-                }
-                if (numOfFrames > 0) {
-                    if (ImGui::Button("Calibrate!")) {
-                        dev.finalizeCalibration();
-                    }
-                }
-                
-
-            }
             
-            if (!mode_calibration) {
-                numOfFrames = 0;
-                calibImg.release();
-                isCalibrating = false;
+        }
+        if (numOfFrames > 0) {
+            if (ImGui::Button("Calibrate!")) {
+                dev.finalizeCalibration();
             }
-            
-            ImGui::End();
         }
         
+        if (!mode_calibration) {
+            numOfFrames = 0;
+            calibImg.release();
+            isCalibrating = false;
+            
+        }
         
-        
-        
-        
-        
-        // MARK: Rendering
-        glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
-        glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
-        glClear(GL_COLOR_BUFFER_BIT);
-        ImGui::Render();
-        SDL_GL_SwapWindow(_window);
+        ImGui::End();
     }
+    
+    
+    
+    
+    
+    
+    // MARK: Rendering
+    glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+    glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui::Render();
+    SDL_GL_SwapWindow(_window);
 }
 
 bool SettingsView::hasEnded() {

@@ -85,7 +85,8 @@ int main(int argc, const char * argv[]) {
             cv::medianBlur(img, img, 7);
             cv::inRange(img, centerColor - cv::Vec3b(bracketSize,bracketSize,bracketSize), centerColor + cv::Vec3b(bracketSize,bracketSize,bracketSize), binImg);
             //cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
-            cv::morphologyEx(binImg, binImg, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(21,21)));
+            cv::morphologyEx(binImg, binImg, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(7,7)));
+            cv::morphologyEx(binImg, binImg, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15,15)));
             cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
             
             

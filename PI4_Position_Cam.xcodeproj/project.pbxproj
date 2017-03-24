@@ -35,6 +35,9 @@
 		82205A8E1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82205A791E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */; };
 		82205A8F1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82205A7A1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */; };
 		82205A901E575639009555DC /* libopencv_ximgproc.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82205A7B1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */; };
+		8236E58A1E84ADB100433805 /* libopencv_photo.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8236E5871E84ADB100433805 /* libopencv_photo.3.1.0.dylib */; };
+		8236E58B1E84ADB100433805 /* libopencv_photo.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8236E5881E84ADB100433805 /* libopencv_photo.3.1.0.dylib */; };
+		8236E58C1E84ADB100433805 /* libopencv_photo.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8236E5891E84ADB100433805 /* libopencv_photo.3.1.0.dylib */; };
 		823B485E1E7B6602009AA735 /* BaseVideoDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */; };
 		82B24E8D1E7E229A006FAB12 /* imgui_impl_sdl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B24E8B1E7E229A006FAB12 /* imgui_impl_sdl.cpp */; };
 		82B24E901E7E2333006FAB12 /* HorizontalThinningAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B24E8E1E7E2333006FAB12 /* HorizontalThinningAlgorithm.cpp */; };
@@ -96,6 +99,9 @@
 		82205A7A1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_ximgproc.3.1.0.dylib; path = ../../../../../usr/local/lib/libopencv_ximgproc.3.1.0.dylib; sourceTree = "<group>"; };
 		82205A7B1E575639009555DC /* libopencv_ximgproc.3.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_ximgproc.3.1.0.dylib; path = ../../../../../usr/local/lib/libopencv_ximgproc.3.1.0.dylib; sourceTree = "<group>"; };
 		82205A911E575732009555DC /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lib; sourceTree = "<group>"; };
+		8236E5871E84ADB100433805 /* libopencv_photo.3.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_photo.3.1.0.dylib; path = ../../../../../usr/local/lib/libopencv_photo.3.1.0.dylib; sourceTree = "<group>"; };
+		8236E5881E84ADB100433805 /* libopencv_photo.3.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_photo.3.1.0.dylib; path = ../../../../../usr/local/lib/libopencv_photo.3.1.0.dylib; sourceTree = "<group>"; };
+		8236E5891E84ADB100433805 /* libopencv_photo.3.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_photo.3.1.0.dylib; path = ../../../../../usr/local/lib/libopencv_photo.3.1.0.dylib; sourceTree = "<group>"; };
 		823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BaseVideoDevice.cpp; sourceTree = "<group>"; };
 		823B485D1E7B6602009AA735 /* BaseVideoDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseVideoDevice.hpp; sourceTree = "<group>"; };
 		82B24E8B1E7E229A006FAB12 /* imgui_impl_sdl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_impl_sdl.cpp; sourceTree = "<group>"; };
@@ -126,6 +132,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8236E58A1E84ADB100433805 /* libopencv_photo.3.1.0.dylib in Frameworks */,
+				8236E58B1E84ADB100433805 /* libopencv_photo.3.1.0.dylib in Frameworks */,
+				8236E58C1E84ADB100433805 /* libopencv_photo.3.1.0.dylib in Frameworks */,
 				82F822461E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib in Frameworks */,
 				82F822471E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib in Frameworks */,
 				82FF15A41E804A6600E5AB5B /* OpenGL.framework in Frameworks */,
@@ -201,6 +210,9 @@
 		82205A641E5755F3009555DC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8236E5871E84ADB100433805 /* libopencv_photo.3.1.0.dylib */,
+				8236E5881E84ADB100433805 /* libopencv_photo.3.1.0.dylib */,
+				8236E5891E84ADB100433805 /* libopencv_photo.3.1.0.dylib */,
 				82F822441E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib */,
 				82F822451E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib */,
 				82FF15A31E804A6600E5AB5B /* OpenGL.framework */,
