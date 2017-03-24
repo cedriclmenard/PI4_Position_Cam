@@ -58,14 +58,7 @@ std::vector<std::string> files;
 // MARK: Other file global variables
 std::string calibrationFilePath;
 
-struct CalibrationParameters {
-    
-    int boardNumOfSquaresInWidth = 9;
-    int boardNumOfSquaresInHeight = 6;
-    float squareSizeInM = 0.0225;
-    cv::Size imageSize = cv::Size(480,640);
-    
-} calibParams;
+//CalibrationParameters calibParams;
 
 
 
@@ -169,43 +162,39 @@ void fileSave(void (*callback)(std::string* filePath, void* userData) = NULL, vo
 
 // MARK: Windows
 
-void showSettingsWindow(std::vector<float> &data, int* bracketValue, bool &isCalibrating, CalibratedDevice<PSEyeOCVVideoDevice> &dev) {
+void showSettingsWindow(SyncThreadsParameters *sync , int* bracketValue) {
     ImGui::Begin("Settings", &show_settings_window);
     ImGui::Text("This is a test");
     ImGui::SliderInt("Color bracket", bracketValue, 1, 150);
     //ImGui::TextWrapped("%s", text);
-    ImGui::PlotLines("Detected Lines", data.data(), data.size());
+    ImGui::PlotLines("Detected Lines", (*sync).result.data(), (*sync).result.size());
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     
     ImGui::Separator();
     ImGui::Text("Calibration");
     ImGui::Text("Number of squares in the calibration pattern");
     ImGui::PushItemWidth(100);
-    ImGui::InputInt("Width", &calibParams.boardNumOfSquaresInWidth);
-    if (calibParams.boardNumOfSquaresInWidth < 2) calibParams.boardNumOfSquaresInWidth = 2;
+    ImGui::InputInt("Width", &(*sync).calibParams.boardNumOfSquaresInWidth);
+    if ((*sync).calibParams.boardNumOfSquaresInWidth < 2) (*sync).calibParams.boardNumOfSquaresInWidth = 2;
     ImGui::SameLine();
-    ImGui::InputInt("Height", &calibParams.boardNumOfSquaresInHeight);
-    if (calibParams.boardNumOfSquaresInHeight < 2) calibParams.boardNumOfSquaresInHeight = 2;
-    ImGui::InputFloat("Square Size in meter", &calibParams.squareSizeInM);
-    if (calibParams.squareSizeInM <= 0) calibParams.boardNumOfSquaresInHeight = 0.01;
+    ImGui::InputInt("Height", &(*sync).calibParams.boardNumOfSquaresInHeight);
+    if ((*sync).calibParams.boardNumOfSquaresInHeight < 2) (*sync).calibParams.boardNumOfSquaresInHeight = 2;
+    ImGui::InputFloat("Square Size in meter", &(*sync).calibParams.squareSizeInM);
+    if ((*sync).calibParams.squareSizeInM <= 0) (*sync).calibParams.boardNumOfSquaresInHeight = 0.01;
     ImGui::PopItemWidth();
     
     if (ImGui::Button("Start Calibration")) {
-        mode_calibration = true;
-        isCalibrating = true;
-        dev.beginCalibration(calibParams.boardNumOfSquaresInWidth, calibParams.boardNumOfSquaresInHeight, calibParams.squareSizeInM, calibParams.imageSize);
+        (*sync).startCalibration = true;
     }
     
     
     ImGui::End();
 }
 
-void showInitialImageWindow(unsigned char* bgr, int w, int h, void (*_mouseCallbackOnBGRImage)(int x, int y, void* userData), void *_mouseCallbackOnBGRImageUserData) {
+void showInitialImageWindow(GLuint bgrTex, int w, int h, void (*_mouseCallbackOnBGRImage)(int x, int y, void* userData), void *_mouseCallbackOnBGRImageUserData) {
     ImGui::SetNextWindowPos(ImVec2(300, 20), ImGuiSetCond_Once);
     ImGui::Begin("Initial Image", &show_initial_image_window, ImVec2(0,0), -1.0f, ImGuiWindowFlags_NoResize);
-    //ImGui::Begin("Initial Image", &showInitialImage);
-    ImTextureID tex = (ImTextureID)bgrImageToTexture(bgr, w, h);
-    ImGui::Image(tex, ImVec2(w,h));
+    ImGui::Image((ImTextureID) bgrTex, ImVec2(w,h));
     if (ImGui::IsItemClicked()) {
         if (_mouseCallbackOnBGRImage != NULL) {
             int x, y;
@@ -223,11 +212,10 @@ void showInitialImageWindow(unsigned char* bgr, int w, int h, void (*_mouseCallb
     
 }
 
-void showBinaryImageWindow(unsigned char* grayscale, int w, int h) {
+void showBinaryImageWindow(GLuint grayTex, int w, int h) {
     ImGui::SetNextWindowPos(ImVec2(600, 20), ImGuiSetCond_Once);
     ImGui::Begin("Binary Image", &show_binary_image_window, ImVec2(0,0), -1.0f, ImGuiWindowFlags_NoResize);
-    ImTextureID tex = (ImTextureID)grayscaleImageToTexture(grayscale, w, h);
-    ImGui::Image(tex, ImVec2(w,h));
+    ImGui::Image((ImTextureID) grayTex, ImVec2(w,h));
     ImGui::End();
 }
 
@@ -285,7 +273,7 @@ SettingsView::~SettingsView() {
     QuitSDLOGLForViews();
 }
 
-void SettingsView::runForThisFrame(unsigned char* bgr, unsigned char* grayscale, int w, int h, const char* text, std::vector<float> &data, CalibratedDevice<PSEyeOCVVideoDevice> &dev, bool &isCalibrating) {
+void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
     SDL_Event event;
     SDL_PollEvent(&event);
     ImGui_ImplSdl_ProcessEvent(&event);
@@ -313,15 +301,15 @@ void SettingsView::runForThisFrame(unsigned char* bgr, unsigned char* grayscale,
     
     
     // MARK: Window processing
-    if (!mode_calibration) {
+    if (!(*sync).startCalibration) {
         
         static ImGuiStyle style = ImGui::GetStyle();
         ImGui::ShowStyleEditor(&style);
-        if (show_settings_window) showSettingsWindow(data, _bracketValue, isCalibrating, dev);
+        if (show_settings_window) showSettingsWindow(sync , _bracketValue);
         
-        if (show_initial_image_window && bgr != NULL) showInitialImageWindow(bgr, w, h, _mouseCallbackOnBGRImage, _mouseCallbackOnBGRImageUserData);
+        if (show_initial_image_window && (*sync).bgrTex != 0) showInitialImageWindow((*sync).bgrTex, w, h, _mouseCallbackOnBGRImage, _mouseCallbackOnBGRImageUserData);
         
-        if (show_binary_image_window && grayscale != NULL) showBinaryImageWindow(grayscale, w, h);
+        if (show_binary_image_window && (*sync).grayTex != 0) showBinaryImageWindow((*sync).grayTex, w, h);
         
         
         
@@ -342,56 +330,46 @@ void SettingsView::runForThisFrame(unsigned char* bgr, unsigned char* grayscale,
     } else {
         
         // MARK: Calibration procedure
-        static cv::Mat calibImg;
-        static bool nextFrame = false;
-        static bool lastFrameIsValid = false;
         static unsigned int numOfFrames = 0;
         
         ImGui::Begin("Calibration Image", NULL, ImGuiWindowFlags_NoResize);
         
         if (ImGui::Button("Cancel")) {
-            mode_calibration = false;
+            (*sync).startCalibration = false;
+            
         }
         
-        if (!calibImg.empty()) {
-            ImTextureID tex = (ImTextureID) bgrImageToTexture(calibImg.data, calibImg.size[1], calibImg.size[0]);
-            ImGui::Image(tex, ImVec2(w,h));
+        if ((*sync).calibImgTex != 0) {
+            ImGui::Image((ImTextureID)(*sync).calibImgTex, ImVec2(w,h));
         } else {
             // Renders black texture, clip to edges
-            ImTextureID tex = (ImTextureID) singleColorRGBAToTexture(0x000000FF);
-            ImGui::Image(tex,ImVec2(w,h));
+            ImGui::Image((ImTextureID) singleColorRGBAToTexture(0x000000FF), ImVec2(w,h));
         }
+        
         ImGui::Text("Number of valid frames kept for calibration : %u", numOfFrames);
-        if (!lastFrameIsValid) {
-            if (!dev.checkOneFrame(calibImg)) {
-                dev >> calibImg;
-            } else {
-                lastFrameIsValid = true;
-            }
-        } else {
-            
+        
+        if ((*sync).lastFrameIsValid) {
             if (ImGui::Button("Keep")) {
-                dev.useLastValidFrameForCalibration();
-                lastFrameIsValid = false;
+                (*sync).useLastFrame = true;
+                (*sync).lastFrameIsValid = false;
                 numOfFrames++;
             }
             ImGui::SameLine();
             if (ImGui::Button("Discard")) {
-                lastFrameIsValid = false;
-            }
-            
-            
-        }
-        if (numOfFrames > 0) {
-            if (ImGui::Button("Calibrate!")) {
-                dev.finalizeCalibration();
+                (*sync).lastFrameIsValid = false;
             }
         }
         
-        if (!mode_calibration) {
+        
+        
+        if (numOfFrames > 0) {
+            if (ImGui::Button("Calibrate!")) {
+                (*sync).finalizeCalibration = true;
+            }
+        }
+        
+        if (!(*sync).startCalibration) {
             numOfFrames = 0;
-            calibImg.release();
-            isCalibrating = false;
             
         }
         
