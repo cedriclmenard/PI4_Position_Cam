@@ -125,7 +125,9 @@ static int main_imageprocessing(void* data) {
             
             HorizontalThinningAlgorithm algo = HorizontalThinningAlgorithm(img2);
             algo.compute();
+            sync.newResultsAreAvailable = false;
             sync.result = algo.getResult();
+            sync.newResultsAreAvailable = true;
             
             // This is a wannabe mutex (without all the fuzzy OS-thingy going on)
             sync.newImagesAvailable = false;
@@ -188,4 +190,6 @@ static int main_imageprocessing(void* data) {
     
     return 0;
 }
+
+
 

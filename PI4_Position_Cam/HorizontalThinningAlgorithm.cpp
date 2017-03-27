@@ -8,6 +8,21 @@
 
 #include "HorizontalThinningAlgorithm.hpp"
 
+// MARK: Supporting functions
+
+std::vector<std::tuple<unsigned int, float>> nonZeroElementsOfVectorResult(std::vector<float> &result) {
+    std::vector<std::tuple<unsigned int, float>> resultNonNull;
+    for (auto iter = result.begin(); iter < result.end(); iter++) {
+        if ((*iter) != 0) {
+            resultNonNull.emplace_back(iter - result.begin(), (*iter));
+        }
+    }
+    return resultNonNull;
+}
+
+
+
+// MARK: Class definitions
 
 struct ParallelHorizontalThinning : public cv::ParallelLoopBody {
     cv::Mat _binImg;
@@ -89,3 +104,8 @@ std::vector<float> HorizontalThinningAlgorithm::getResult() {
     
     return _points;
 }
+
+std::vector<std::tuple<unsigned int, float>> HorizontalThinningAlgorithm::getResultNonZero() {
+    return nonZeroElementsOfVectorResult(_points);
+}
+

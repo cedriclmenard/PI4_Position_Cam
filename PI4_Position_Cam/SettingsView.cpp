@@ -166,7 +166,12 @@ void showSettingsWindow(SyncThreadsParameters *sync , int* bracketValue) {
     ImGui::Text("This is a test");
     ImGui::SliderInt("Color bracket", bracketValue, 1, 150);
     //ImGui::TextWrapped("%s", text);
-    ImGui::PlotLines("Detected Lines", (*sync).result.data(), (*sync).result.size());
+    if ((*sync).newResultsAreAvailable) {
+        ImGui::PlotLines("Detected Lines", (*sync).result.data(), (*sync).result.size());
+    } else {
+        ImGui::PlotLines("Detected Lines", NULL, 0);
+    }
+    
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     
     ImGui::Separator();

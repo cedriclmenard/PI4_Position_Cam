@@ -60,4 +60,25 @@ struct SyncThreadsParameters {
     
 };
 
+
+
+#ifdef DEBUG
+
+//std::string debugResult(std::vector<std::tuple<unsigned int, float>> &result) {
+//    std::ostringstream oss;
+//
+//    for (auto iter = result.begin(); iter < result.end() - 1; iter++) {
+//        oss << std::get<0>(*iter) << "," << std::get<1>(*iter) << ",";
+//    }
+//    oss << std::get<0>(*result.end()) << "," << std::get<1>(*result.end());
+//
+//    return oss.str();
+//
+//};
+
+#endif
+
+
+
 #endif /* CommonTypes_hpp */
+
