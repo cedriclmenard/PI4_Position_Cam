@@ -25,15 +25,15 @@ struct CalibrationParameters {
 struct SyncThreadsParameters {
     // MARK: Set by image processing thread
     bool newImagesAvailable = false;
-    GLuint bgrTex = 0;
-    GLuint grayTex = 0;
+    unsigned char* bgrPtr = NULL;
+    unsigned char* grayPtr = NULL;
     
     bool newResultsAreAvailable = false;
     std::vector<float> result;
     
     // For calibration
     bool lastFrameIsValid = false;
-    GLuint calibImgTex = 0;
+    unsigned char* calibImgPtr = NULL;
     
     // MARK: Set by GUI processing thread (main)
     bool startCalibration = false;

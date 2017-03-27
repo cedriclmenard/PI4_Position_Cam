@@ -60,13 +60,15 @@ int main(int argc, const char * argv[]) {
     
     SDL_Thread *improcThread = SDL_CreateThread(main_imageprocessing, "image_processing", (void*) &settView);
     
-    while (settView.hasEnded()) {
+    while (!settView.hasEnded()) {
         settView.runForThisFrame(640, 480, &sync);
     }
     sync.stopProgram = true;
     
     
     
+    // Exit so created thread doesn't get owned by the OS
+    SDL_WaitThread(improcThread, NULL);
     
     
     
@@ -108,6 +110,9 @@ static int main_imageprocessing(void* data) {
                 dev.cam->setAutogain(true);
                 dev.cam->setExposure(150);
             }
+            
+            
+            
             dev >> img;
             cv::medianBlur(img, img, 7);
             cv::inRange(img, centerColor - cv::Vec3b(sync.bracketSize,sync.bracketSize,sync.bracketSize), centerColor + cv::Vec3b(sync.bracketSize,sync.bracketSize,sync.bracketSize), binImg);
@@ -121,14 +126,20 @@ static int main_imageprocessing(void* data) {
             HorizontalThinningAlgorithm algo = HorizontalThinningAlgorithm(img2);
             algo.compute();
             sync.result = algo.getResult();
+            
+            // This is a wannabe mutex (without all the fuzzy OS-thingy going on)
+            sync.newImagesAvailable = false;
             imgData = img.getMat(cv::ACCESS_READ).data;
             binData = binImg.getMat(cv::ACCESS_READ).data;
-            sync.bgrTex = bgrImageToTexture(imgData, 640, 480);
-            sync.grayTex = grayscaleImageToTexture(binData, 640, 480);
+            
+            sync.bgrPtr = imgData;
+            sync.grayPtr = binData;
+            
+            sync.newImagesAvailable = true;
             
         } else if (sync.startCalibration) {
             static bool beganCalibration = false;
-            if (beganCalibration) {
+            if (!beganCalibration) {
                 calibDev.beginCalibration(sync.calibParams.boardNumOfSquaresInWidth, sync.calibParams.boardNumOfSquaresInHeight, sync.calibParams.squareSizeInM, sync.calibParams.imageSize);
                 beganCalibration = true;
             }
@@ -139,7 +150,9 @@ static int main_imageprocessing(void* data) {
             } else {
                 calibDev >> img;
                 sync.lastFrameIsValid = calibDev.checkOneFrame(img);
-                sync.calibImgTex = bgrImageToTexture(img.getMat(cv::ACCESS_READ).data, 640, 480);
+                sync.newImagesAvailable = false;
+                sync.calibImgPtr = img.getMat(cv::ACCESS_READ).data;
+                sync.newImagesAvailable = true;
             }
             
             if (sync.finalizeCalibration) {

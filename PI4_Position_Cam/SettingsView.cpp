@@ -30,7 +30,6 @@ bool show_initial_image_window = true;
 bool show_binary_image_window = true;
 bool show_load_file_popup = false;
 bool show_save_file_popup = false;
-bool mode_calibration = false;
 
 
 
@@ -135,8 +134,8 @@ void fileSave(void (*callback)(std::string* filePath, void* userData) = NULL, vo
         ImGui::InputText("Save file (including path)", buf, 500);
         ImGui::Separator();
         
-        ImGui::Columns(5, NULL, false);
-        for (int i = 0; i < 3;i++) ImGui::NextColumn();
+        ImGui::Columns(4, NULL, false);
+        for (int i = 0; i < 2;i++) ImGui::NextColumn();
         if (ImGui::Button("Cancel")) {
             ImGui::CloseCurrentPopup();
         }
@@ -219,7 +218,7 @@ void showBinaryImageWindow(GLuint grayTex, int w, int h) {
     ImGui::End();
 }
 
-void showMenuFile() {
+void showMenuFile(bool mode_calibration) {
     if (ImGui::MenuItem("Load Calibration Data",NULL,false, !mode_calibration)) {
         show_load_file_popup = true;
     }
@@ -292,7 +291,7 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
     // Menu bar
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            showMenuFile();
+            showMenuFile((*sync).startCalibration);
             ImGui::EndMenu();
         }
         
@@ -307,9 +306,21 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
         ImGui::ShowStyleEditor(&style);
         if (show_settings_window) showSettingsWindow(sync , _bracketValue);
         
-        if (show_initial_image_window && (*sync).bgrTex != 0) showInitialImageWindow((*sync).bgrTex, w, h, _mouseCallbackOnBGRImage, _mouseCallbackOnBGRImageUserData);
+        if (show_initial_image_window && (*sync).bgrPtr != NULL) {
+            static GLuint bgrTex = 0;
+            if ((*sync).newImagesAvailable) {
+                bgrTex = bgrImageToTexture((*sync).bgrPtr, w, h);
+            }
+            showInitialImageWindow(bgrTex, w, h, _mouseCallbackOnBGRImage, _mouseCallbackOnBGRImageUserData);
+        }
         
-        if (show_binary_image_window && (*sync).grayTex != 0) showBinaryImageWindow((*sync).grayTex, w, h);
+        if (show_binary_image_window && (*sync).grayPtr != NULL) {
+            static GLuint grayTex = 0;
+            if ((*sync).newImagesAvailable) {
+                grayTex = grayscaleImageToTexture((*sync).grayPtr, w, h);
+            }
+            showBinaryImageWindow(grayTex, w, h);
+        }
         
         
         
@@ -339,8 +350,12 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
             
         }
         
-        if ((*sync).calibImgTex != 0) {
-            ImGui::Image((ImTextureID)(*sync).calibImgTex, ImVec2(w,h));
+        if ((*sync).calibImgPtr != NULL) {
+            static GLuint tex = 0;
+            if ((*sync).newImagesAvailable) {
+                tex = bgrImageToTexture((*sync).calibImgPtr, w, h);
+            }
+            ImGui::Image((ImTextureID)tex, ImVec2(w,h));
         } else {
             // Renders black texture, clip to edges
             ImGui::Image((ImTextureID) singleColorRGBAToTexture(0x000000FF), ImVec2(w,h));

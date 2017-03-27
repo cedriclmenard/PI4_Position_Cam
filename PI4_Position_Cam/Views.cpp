@@ -46,7 +46,7 @@ void QuitSDLOGLForViews() {
 
 
 GLuint bgrImageToTexture(unsigned char *bgr, unsigned int width, unsigned int height) {
-    GLuint texture = 0;
+    static GLuint texture = 0;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, bgr);
