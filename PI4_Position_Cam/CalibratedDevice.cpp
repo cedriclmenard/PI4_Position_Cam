@@ -219,7 +219,10 @@ bool CalibratedDevice<VideoDevice>::checkIfCalibrated() {
     return isCalibrated;
 }
 
-
+template<class VideoDevice>
+cv::Mat CalibratedDevice<VideoDevice>::getCameraMat() {
+    return _CM;
+}
 
 
 // MARK: Used template instantiation

@@ -17,6 +17,7 @@
 #include "HorizontalThinningAlgorithm.hpp"
 #include "CalibratedDevice.hpp"
 #include "CommonTypes.hpp"
+#include "ImgProcUtilities.hpp"
 
 cv::Vec3b centerColor = cv::Vec3b(155,155,155);
 
@@ -127,6 +128,7 @@ static int main_imageprocessing(void* data) {
             algo.compute();
             sync.newResultsAreAvailable = false;
             sync.result = algo.getResult();
+            sync.resultPoint = algo.getResultNonZero();
             sync.newResultsAreAvailable = true;
             
             // This is a wannabe mutex (without all the fuzzy OS-thingy going on)
@@ -138,6 +140,22 @@ static int main_imageprocessing(void* data) {
             sync.grayPtr = binData;
             
             sync.newImagesAvailable = true;
+            
+            
+            
+            
+            // MARK: Result processing (PNP)
+            static BackprojectTransformation bpTsf;
+            if (sync.computeReferenceForPNP) {
+                bpTsf.initComputeReference(sync.resultPoint, sync.wingSize, calibDev.getCameraMat());
+                sync.computeReferenceForPNP = false;
+            }
+            if (sync.computeBackprojection) {
+                sync.backprojectionResultsAreAvailable = false;
+                bpTsf.backproject2Dto3D(sync.resultPoint, sync.backprojectionResult);
+                sync.backprojectionResultsAreAvailable = true;
+            }
+            
             
         } else if (sync.startCalibration) {
             static bool beganCalibration = false;

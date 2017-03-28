@@ -23,7 +23,8 @@ public:
     HorizontalThinningAlgorithm(cv::Mat binImg);
     void compute();
     std::vector<float> getResult();
-    std::vector<std::tuple<unsigned int, float>> getResultNonZero();
+    std::vector<std::tuple<unsigned int, float>> getResultNonZeroTuple();
+    std::vector<cv::Point2f> getResultNonZero();
 };
 
 #endif /* HorizontalThinningAlgorithm_hpp */

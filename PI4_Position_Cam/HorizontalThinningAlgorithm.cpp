@@ -10,7 +10,7 @@
 
 // MARK: Supporting functions
 
-std::vector<std::tuple<unsigned int, float>> nonZeroElementsOfVectorResult(std::vector<float> &result) {
+std::vector<std::tuple<unsigned int, float>> nonZeroElementsOfVectorResultTuple(std::vector<float> &result) {
     std::vector<std::tuple<unsigned int, float>> resultNonNull;
     for (auto iter = result.begin(); iter < result.end(); iter++) {
         if ((*iter) != 0) {
@@ -20,6 +20,15 @@ std::vector<std::tuple<unsigned int, float>> nonZeroElementsOfVectorResult(std::
     return resultNonNull;
 }
 
+std::vector<cv::Point2f> nonZeroElementsOfVectorResult(std::vector<float> &result) {
+    std::vector<cv::Point2f> resultNonNull;
+    for (auto iter = result.begin(); iter < result.end(); iter++) {
+        if ((*iter) != 0) {
+            resultNonNull.emplace_back(iter - result.begin(), (*iter));
+        }
+    }
+    return resultNonNull;
+}
 
 
 // MARK: Class definitions
@@ -105,7 +114,11 @@ std::vector<float> HorizontalThinningAlgorithm::getResult() {
     return _points;
 }
 
-std::vector<std::tuple<unsigned int, float>> HorizontalThinningAlgorithm::getResultNonZero() {
+std::vector<std::tuple<unsigned int, float>> HorizontalThinningAlgorithm::getResultNonZeroTuple() {
+    return nonZeroElementsOfVectorResultTuple(_points);
+}
+
+std::vector<cv::Point2f> HorizontalThinningAlgorithm::getResultNonZero() {
     return nonZeroElementsOfVectorResult(_points);
 }
 

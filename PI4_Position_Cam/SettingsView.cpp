@@ -166,8 +166,8 @@ void showSettingsWindow(SyncThreadsParameters *sync , int* bracketValue) {
     ImGui::Text("This is a test");
     ImGui::SliderInt("Color bracket", bracketValue, 1, 150);
     //ImGui::TextWrapped("%s", text);
-    if ((*sync).newResultsAreAvailable) {
-        ImGui::PlotLines("Detected Lines", (*sync).result.data(), (*sync).result.size());
+    if (sync->newResultsAreAvailable) {
+        ImGui::PlotLines("Detected Lines", sync->result.data(), sync->result.size());
     } else {
         ImGui::PlotLines("Detected Lines", NULL, 0);
     }
@@ -178,19 +178,29 @@ void showSettingsWindow(SyncThreadsParameters *sync , int* bracketValue) {
     ImGui::Text("Calibration");
     ImGui::Text("Number of squares in the calibration pattern");
     ImGui::PushItemWidth(100);
-    ImGui::InputInt("Width", &(*sync).calibParams.boardNumOfSquaresInWidth);
-    if ((*sync).calibParams.boardNumOfSquaresInWidth < 2) (*sync).calibParams.boardNumOfSquaresInWidth = 2;
+    ImGui::InputInt("Width", &sync->calibParams.boardNumOfSquaresInWidth);
+    if (sync->calibParams.boardNumOfSquaresInWidth < 2) sync->calibParams.boardNumOfSquaresInWidth = 2;
     ImGui::SameLine();
-    ImGui::InputInt("Height", &(*sync).calibParams.boardNumOfSquaresInHeight);
-    if ((*sync).calibParams.boardNumOfSquaresInHeight < 2) (*sync).calibParams.boardNumOfSquaresInHeight = 2;
-    ImGui::InputFloat("Square Size in meter", &(*sync).calibParams.squareSizeInM);
-    if ((*sync).calibParams.squareSizeInM <= 0) (*sync).calibParams.boardNumOfSquaresInHeight = 0.01;
+    ImGui::InputInt("Height", &sync->calibParams.boardNumOfSquaresInHeight);
+    if (sync->calibParams.boardNumOfSquaresInHeight < 2) sync->calibParams.boardNumOfSquaresInHeight = 2;
+    ImGui::InputFloat("Square size [m]", &sync->calibParams.squareSizeInM);
+    if (sync->calibParams.squareSizeInM <= 0) sync->calibParams.boardNumOfSquaresInHeight = 0.01;
     ImGui::PopItemWidth();
     
     if (ImGui::Button("Start Calibration")) {
-        (*sync).startCalibration = true;
+        sync->startCalibration = true;
     }
     
+    ImGui::InputFloat("Wing size [m]", &sync->wingSize);
+    if (sync->wingSize <= 0.0) sync->wingSize = 0.1;
+    ImGui::SameLine();
+    if (!sync->computeReferenceForPNP) {
+        if (ImGui::Button("Set As Reference Frame")) {
+            sync->computeReferenceForPNP = true;
+        }
+    }
+    if (sync->backprojectionReferenceIsSet)
+        ImGui::Checkbox("Compute Backprojection", &sync->computeBackprojection);
     
     ImGui::End();
 }
@@ -296,7 +306,7 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
     // Menu bar
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            showMenuFile((*sync).startCalibration);
+            showMenuFile(sync->startCalibration);
             ImGui::EndMenu();
         }
         
@@ -305,24 +315,24 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
     
     
     // MARK: Window processing
-    if (!(*sync).startCalibration) {
+    if (!sync->startCalibration) {
         
         static ImGuiStyle style = ImGui::GetStyle();
         ImGui::ShowStyleEditor(&style);
         if (show_settings_window) showSettingsWindow(sync , _bracketValue);
         
-        if (show_initial_image_window && (*sync).bgrPtr != NULL) {
+        if (show_initial_image_window && sync->bgrPtr != NULL) {
             static GLuint bgrTex = 0;
-            if ((*sync).newImagesAvailable) {
-                bgrTex = bgrImageToTexture((*sync).bgrPtr, w, h);
+            if (sync->newImagesAvailable) {
+                bgrTex = bgrImageToTexture(sync->bgrPtr, w, h);
             }
             showInitialImageWindow(bgrTex, w, h, _mouseCallbackOnBGRImage, _mouseCallbackOnBGRImageUserData);
         }
         
-        if (show_binary_image_window && (*sync).grayPtr != NULL) {
+        if (show_binary_image_window && sync->grayPtr != NULL) {
             static GLuint grayTex = 0;
-            if ((*sync).newImagesAvailable) {
-                grayTex = grayscaleImageToTexture((*sync).grayPtr, w, h);
+            if (sync->newImagesAvailable) {
+                grayTex = grayscaleImageToTexture(sync->grayPtr, w, h);
             }
             showBinaryImageWindow(grayTex, w, h);
         }
@@ -351,14 +361,14 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
         ImGui::Begin("Calibration Image", NULL, ImGuiWindowFlags_NoResize);
         
         if (ImGui::Button("Cancel")) {
-            (*sync).startCalibration = false;
+            sync->startCalibration = false;
             
         }
         
-        if ((*sync).calibImgPtr != NULL) {
+        if (sync->calibImgPtr != NULL) {
             static GLuint tex = 0;
-            if ((*sync).newImagesAvailable) {
-                tex = bgrImageToTexture((*sync).calibImgPtr, w, h);
+            if (sync->newImagesAvailable) {
+                tex = bgrImageToTexture(sync->calibImgPtr, w, h);
             }
             ImGui::Image((ImTextureID)tex, ImVec2(w,h));
         } else {
@@ -368,15 +378,15 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
         
         ImGui::Text("Number of valid frames kept for calibration : %u", numOfFrames);
         
-        if ((*sync).lastFrameIsValid) {
+        if (sync->lastFrameIsValid) {
             if (ImGui::Button("Keep")) {
-                (*sync).useLastFrame = true;
-                (*sync).lastFrameIsValid = false;
+                sync->useLastFrame = true;
+                sync->lastFrameIsValid = false;
                 numOfFrames++;
             }
             ImGui::SameLine();
             if (ImGui::Button("Discard")) {
-                (*sync).lastFrameIsValid = false;
+                sync->lastFrameIsValid = false;
             }
         }
         
@@ -384,11 +394,11 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
         
         if (numOfFrames > 0) {
             if (ImGui::Button("Calibrate!")) {
-                (*sync).finalizeCalibration = true;
+                sync->finalizeCalibration = true;
             }
         }
         
-        if (!(*sync).startCalibration) {
+        if (!sync->startCalibration) {
             numOfFrames = 0;
             
         }

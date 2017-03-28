@@ -30,10 +30,17 @@ struct SyncThreadsParameters {
     
     bool newResultsAreAvailable = false;
     std::vector<float> result;
+    std::vector<cv::Point2f> resultPoint;
     
     // For calibration
     bool lastFrameIsValid = false;
     unsigned char* calibImgPtr = NULL;
+    
+    bool backprojectionReferenceIsSet = false;
+    
+    bool backprojectionResultsAreAvailable = false;
+    std::vector<cv::Point3f> backprojectionResult;
+    
     
     // MARK: Set by GUI processing thread (main)
     bool startCalibration = false;
@@ -55,6 +62,11 @@ struct SyncThreadsParameters {
     
     // For processing
     int bracketSize = 20;
+    
+    // For PNP matching
+    float wingSize = 0.6;
+    bool computeReferenceForPNP = false;
+    bool computeBackprojection = false;
     
     
     

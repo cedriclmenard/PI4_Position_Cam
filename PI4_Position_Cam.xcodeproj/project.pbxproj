@@ -40,6 +40,7 @@
 		8236E58C1E84ADB100433805 /* libopencv_photo.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8236E5891E84ADB100433805 /* libopencv_photo.3.1.0.dylib */; };
 		8236E58F1E85567C00433805 /* CommonTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8236E58D1E85567C00433805 /* CommonTypes.cpp */; };
 		823B485E1E7B6602009AA735 /* BaseVideoDevice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */; };
+		823CF3461E88A57C00759E22 /* ImgProcUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823CF3441E88A57C00759E22 /* ImgProcUtilities.cpp */; };
 		82B24E8D1E7E229A006FAB12 /* imgui_impl_sdl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B24E8B1E7E229A006FAB12 /* imgui_impl_sdl.cpp */; };
 		82B24E901E7E2333006FAB12 /* HorizontalThinningAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82B24E8E1E7E2333006FAB12 /* HorizontalThinningAlgorithm.cpp */; };
 		82F822461E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F822441E8323A100C32A08 /* libopencv_calib3d.3.1.0.dylib */; };
@@ -107,6 +108,8 @@
 		8236E58E1E85567C00433805 /* CommonTypes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CommonTypes.hpp; sourceTree = "<group>"; };
 		823B485C1E7B6602009AA735 /* BaseVideoDevice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BaseVideoDevice.cpp; sourceTree = "<group>"; };
 		823B485D1E7B6602009AA735 /* BaseVideoDevice.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseVideoDevice.hpp; sourceTree = "<group>"; };
+		823CF3441E88A57C00759E22 /* ImgProcUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImgProcUtilities.cpp; sourceTree = "<group>"; };
+		823CF3451E88A57C00759E22 /* ImgProcUtilities.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ImgProcUtilities.hpp; sourceTree = "<group>"; };
 		82B24E8B1E7E229A006FAB12 /* imgui_impl_sdl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_impl_sdl.cpp; sourceTree = "<group>"; };
 		82B24E8C1E7E229A006FAB12 /* imgui_impl_sdl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui_impl_sdl.h; sourceTree = "<group>"; };
 		82B24E8E1E7E2333006FAB12 /* HorizontalThinningAlgorithm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HorizontalThinningAlgorithm.cpp; sourceTree = "<group>"; };
@@ -278,6 +281,8 @@
 			children = (
 				82B24E8E1E7E2333006FAB12 /* HorizontalThinningAlgorithm.cpp */,
 				82B24E8F1E7E2333006FAB12 /* HorizontalThinningAlgorithm.hpp */,
+				823CF3441E88A57C00759E22 /* ImgProcUtilities.cpp */,
+				823CF3451E88A57C00759E22 /* ImgProcUtilities.hpp */,
 			);
 			name = "Image Processing";
 			sourceTree = "<group>";
@@ -366,6 +371,7 @@
 				82B24E8D1E7E229A006FAB12 /* imgui_impl_sdl.cpp in Sources */,
 				82FF15BA1E805E1400E5AB5B /* Views.cpp in Sources */,
 				82205A3D1E575367009555DC /* main.cpp in Sources */,
+				823CF3461E88A57C00759E22 /* ImgProcUtilities.cpp in Sources */,
 				82FF15AF1E804CE000E5AB5B /* imgui_draw.cpp in Sources */,
 				820470C31E5CA58E00486806 /* CalibratedDevice.cpp in Sources */,
 				82FF15B71E80516E00E5AB5B /* SettingsView.cpp in Sources */,

@@ -39,6 +39,7 @@ public:
     void useLastValidFrameForCalibration();
     void finalizeCalibration();
     bool checkIfCalibrated();
+    cv::Mat getCameraMat();
     
     
 };
