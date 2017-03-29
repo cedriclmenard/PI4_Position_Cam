@@ -41,11 +41,11 @@ struct ParallelHorizontalThinning : public cv::ParallelLoopBody {
     //std::shared_ptr<double> _points;
     float* _points;
     
-    ParallelHorizontalThinning(cv::Mat binImg) :
-    _binImg(binImg), _stepSize(binImg.step1(0)), _cols(binImg.size[0]), _data(binImg.data)
+    ParallelHorizontalThinning(cv::Mat binImg, float *points) :
+    _binImg(binImg), _stepSize(binImg.step1(0)), _cols(binImg.size[0]), _data(binImg.data), _points(points)
     {
         //_points.reset(new double[binImg.cols], std::default_delete<double[]>());
-        _points = new float[binImg.rows];  // Non-managed, because it is automatically managed when creating
+        //_points = new float[binImg.rows];  // Non-managed, because it is automatically managed when creating
         // creating a vector from this pointer (see HorizontalThinningAlgorithm::compute() )
     }
     
@@ -102,7 +102,8 @@ _img(binImg)
 }
 
 void HorizontalThinningAlgorithm::compute() {
-    ParallelHorizontalThinning paraHorizThin(_img);
+    float points[_img.rows];
+    ParallelHorizontalThinning paraHorizThin(_img, points);
     cv::Range range = cv::Range(0, _img.rows-1);
     cv::parallel_for_(range, paraHorizThin);
     _points.assign(paraHorizThin._points, paraHorizThin._points + _img.rows);

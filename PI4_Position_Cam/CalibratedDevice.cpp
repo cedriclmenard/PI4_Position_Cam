@@ -8,6 +8,8 @@
 
 #include "CalibratedDevice.hpp"
 
+#define ALPHA_CM 0
+
 // MARK: Supporting functions
 
 std::vector<cv::Point3f> Create3DChessboardCorners(cv::Size boardSize, float squareSize)
@@ -103,7 +105,7 @@ void CalibratedDevice<VideoDevice>::calibrate(ImageView &view, unsigned int numb
     
     // Get distortion correction map for speed
     cv::initUndistortRectifyMap(_CM, _D, cv::Mat(),
-                                cv::getOptimalNewCameraMatrix(_CM, _D, img.size(), 1, img.size(), 0),
+                                cv::getOptimalNewCameraMatrix(_CM, _D, img.size(), ALPHA_CM, img.size(), 0),
                                 img.size(), CV_16SC2, _map1, _map2);
 
 }
@@ -133,6 +135,11 @@ void CalibratedDevice<VideoDevice>::loadParameters(std::string filename){
 
 template<class VideoDevice>
 void CalibratedDevice<VideoDevice>::correctImage(cv::InputArray input, cv::OutputArray output){
+    if (_map1.empty() || _map2.empty()) {
+        cv::initUndistortRectifyMap(_CM, _D, cv::Mat(),
+                                    cv::getOptimalNewCameraMatrix(_CM, _D, input.size(), ALPHA_CM, input.size(), 0),
+                                    input.size(), CV_16SC2, _map1, _map2);
+    }
     cv::remap(input, output, _map1, _map2, cv::INTER_LINEAR);
 }
 
@@ -150,10 +157,9 @@ void CalibratedDevice<VideoDevice>::getImage(cv::OutputArray img) {
 
 
 
-
-
-
 // MARK: Updated calibration procedure
+
+
 struct CalibrationData {
     cv::Size boardSize;
     std::vector<std::vector<cv::Point3f> > objectPoints;
@@ -162,6 +168,7 @@ struct CalibrationData {
     std::vector<cv::Point3f> obj;
     cv::Size imageSize;
 } calibrationData;
+
 
 template<class VideoDevice>
 void CalibratedDevice<VideoDevice>::beginCalibration(int boardNumOfSquaresInWidth, int boardNumOfSquaresInHeight, float squareSizeInM, cv::Size imageSize) {
@@ -208,7 +215,7 @@ void CalibratedDevice<VideoDevice>::finalizeCalibration() {
     
     // Get distortion correction map for speed
     cv::initUndistortRectifyMap(_CM, _D, cv::Mat(),
-                                cv::getOptimalNewCameraMatrix(_CM, _D, calibrationData.imageSize, 1, calibrationData.imageSize, 0),
+                                cv::getOptimalNewCameraMatrix(_CM, _D, calibrationData.imageSize, ALPHA_CM, calibrationData.imageSize, 0),
                                 calibrationData.imageSize, CV_16SC2, _map1, _map2);
     isCalibrated = true;
 }

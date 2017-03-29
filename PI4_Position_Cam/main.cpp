@@ -29,6 +29,7 @@ SyncThreadsParameters sync;
 
 void mouseCallback(int x, int y, void* userData) {
     centerColor = (*((cv::UMat*)userData)).getMat(cv::ACCESS_READ).at<cv::Vec3b>(y,x);
+    //centerColor = (*(cv::Mat*)userData).at<cv::Vec3b>(y,x);
     std::cout << "BGR is : " << +centerColor[0] << ", " << +centerColor[1] << ", " << +centerColor[2] << std::endl;
 }
 
@@ -83,8 +84,8 @@ static int main_imageprocessing(void* data) {
     
     static PSEyeOCVVideoDevice dev = PSEyeOCVVideoDevice();
     static CalibratedDevice<PSEyeOCVVideoDevice> calibDev(dev);
-    cv::UMat img;
-    cv::UMat binImg;
+    cv::UMat img, imgBlur, binImg;
+    //cv::Mat img, imgBlur, binImg;
     SettingsView* settView = (SettingsView*) data;
     
     unsigned char* imgData = NULL;
@@ -114,17 +115,20 @@ static int main_imageprocessing(void* data) {
             
             
             
-            dev >> img;
-            cv::medianBlur(img, img, 7);
-            cv::inRange(img, centerColor - cv::Vec3b(sync.bracketSize,sync.bracketSize,sync.bracketSize), centerColor + cv::Vec3b(sync.bracketSize,sync.bracketSize,sync.bracketSize), binImg);
+            calibDev >> img;
+            
+            cv::medianBlur(img, imgBlur, 7);
+            cv::inRange(imgBlur, centerColor - cv::Vec3b(sync.bracketSize,sync.bracketSize,sync.bracketSize), centerColor + cv::Vec3b(sync.bracketSize,sync.bracketSize,sync.bracketSize), binImg);
             //cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
             cv::morphologyEx(binImg, binImg, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(7,7)));
             cv::morphologyEx(binImg, binImg, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(15,15)));
             cv::Mat img2 = binImg.getMat(cv::ACCESS_READ);
+            imgBlur.release();
             
             
             
             HorizontalThinningAlgorithm algo = HorizontalThinningAlgorithm(img2);
+            //HorizontalThinningAlgorithm algo = HorizontalThinningAlgorithm(img);
             algo.compute();
             sync.newResultsAreAvailable = false;
             sync.result = algo.getResult();
@@ -135,6 +139,9 @@ static int main_imageprocessing(void* data) {
             sync.newImagesAvailable = false;
             imgData = img.getMat(cv::ACCESS_READ).data;
             binData = binImg.getMat(cv::ACCESS_READ).data;
+            //imgData = img.data;
+            //binData = binImg.data;
+            
             
             sync.bgrPtr = imgData;
             sync.grayPtr = binData;
@@ -166,12 +173,14 @@ static int main_imageprocessing(void* data) {
             if (sync.lastFrameIsValid) {
                 if (sync.useLastFrame) {
                     calibDev.useLastValidFrameForCalibration();
+                    sync.useLastFrame = false;
                 }
             } else {
                 calibDev >> img;
                 sync.lastFrameIsValid = calibDev.checkOneFrame(img);
                 sync.newImagesAvailable = false;
                 sync.calibImgPtr = img.getMat(cv::ACCESS_READ).data;
+                //sync.calibImgPtr = img.data;
                 sync.newImagesAvailable = true;
             }
             

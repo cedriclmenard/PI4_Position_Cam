@@ -40,7 +40,7 @@ void computePNPReferenceTransformation(std::vector<cv::Point2f> &imagePoints, fl
         objectPoints.emplace_back(0, i*increment,0);
     }
     
-    cv::solvePnP(objectPoints, imagePoints, cameraMatrix, NULL, rvec, tvec);
+    cv::solvePnP(objectPoints, imagePoints, cameraMatrix, cv::Mat(), rvec, tvec);
     
     
     

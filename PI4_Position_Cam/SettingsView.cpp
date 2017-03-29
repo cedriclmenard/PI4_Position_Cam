@@ -30,6 +30,7 @@ bool show_initial_image_window = true;
 bool show_binary_image_window = true;
 bool show_load_file_popup = false;
 bool show_save_file_popup = false;
+bool show_style_menu = false;
 
 
 
@@ -120,6 +121,7 @@ void fileSelection(void (*callback)(std::string* filePath, void* userData) = NUL
                 calibrationFilePath = files.at(selectedIdx);
                 if (callback != NULL) {
                     callback(&calibrationFilePath, callbackUserData);
+                    ImGui::CloseCurrentPopup();
                 }
             }
         }
@@ -309,6 +311,12 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
             showMenuFile(sync->startCalibration);
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Tools")) {
+            if (ImGui::MenuItem("Show/Hide Style Pane")) {
+                show_style_menu = !show_style_menu;
+            }
+            ImGui::EndMenu();
+        }
         
         ImGui::EndMainMenuBar();
     }
@@ -317,8 +325,12 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
     // MARK: Window processing
     if (!sync->startCalibration) {
         
-        static ImGuiStyle style = ImGui::GetStyle();
-        ImGui::ShowStyleEditor(&style);
+        if (show_style_menu) {
+            ImGui::Begin("Style Pane");
+            ImGuiStyle style = ImGui::GetStyle();
+            ImGui::ShowStyleEditor(&style);
+            ImGui::End();
+        }
         if (show_settings_window) showSettingsWindow(sync , _bracketValue);
         
         if (show_initial_image_window && sync->bgrPtr != NULL) {
