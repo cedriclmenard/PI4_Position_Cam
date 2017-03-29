@@ -58,7 +58,7 @@ int main(int argc, const char * argv[]) {
     //ImageView view2 = ImageView("test Binary",100,580,640,480);
     //view.setMouseDownCallback(mouseCallback,&img);
     
-    SettingsView settView = SettingsView("This is a test", 0, 0, 1280, 720, &sync.bracketSize);
+    SettingsView settView = SettingsView("AER8475 - Camera measurements", 0, 0, 1280, 720, &sync.bracketSize);
     
     SDL_Thread *improcThread = SDL_CreateThread(main_imageprocessing, "image_processing", (void*) &settView);
     
@@ -155,6 +155,7 @@ static int main_imageprocessing(void* data) {
             static BackprojectTransformation bpTsf;
             if (sync.computeReferenceForPNP) {
                 bpTsf.initComputeReference(sync.resultPoint, sync.wingSize, calibDev.getCameraMat());
+                sync.backprojectionReferenceIsSet = true;
                 sync.computeReferenceForPNP = false;
             }
             if (sync.computeBackprojection) {

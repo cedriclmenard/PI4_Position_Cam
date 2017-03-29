@@ -8,6 +8,31 @@
 
 #include "ImgProcUtilities.hpp"
 
+// MARK: Debug functions
+
+std::string type2str(int type) {
+    std::string r;
+    
+    uchar depth = type & CV_MAT_DEPTH_MASK;
+    uchar chans = 1 + (type >> CV_CN_SHIFT);
+    
+    switch ( depth ) {
+        case CV_8U:  r = "8U"; break;
+        case CV_8S:  r = "8S"; break;
+        case CV_16U: r = "16U"; break;
+        case CV_16S: r = "16S"; break;
+        case CV_32S: r = "32S"; break;
+        case CV_32F: r = "32F"; break;
+        case CV_64F: r = "64F"; break;
+        default:     r = "User"; break;
+    }
+    
+    r += "C";
+    r += (chans+'0');
+    
+    return r;
+}
+
 void BackprojectTransformation::initComputeReference(std::vector<cv::Point2f> &imagePoints, float wingSize, cv::InputArray cameraMatrix) {
     _cameraMatrix = cameraMatrix.getMat();
     _R.create(3, 3, CV_32F);
@@ -71,24 +96,33 @@ void backproject2Dto3DFixedZ(std::vector<cv::Point2f> &imagePoints, std::vector<
     
 }
 
-void backproject2Dto3DFixedZ(std::vector<cv::Point2f> &imagePoints, std::vector<cv::Point3f> &outputPoints, cv::InputArray cameraMatrix, cv::InputArray R, cv::InputArray tvec) {
+void backproject2Dto3DFixedZ(std::vector<cv::Point2f> &imagePoints, std::vector<cv::Point3f> &outputPoints, cv::InputArray _cameraMatrix, cv::InputArray _R, cv::InputArray _tvec) {
     
     outputPoints.reserve(imagePoints.size());
     
+    cv::Mat R = _R.getMat();
+    std::cout << type2str(R.type()) << std::endl;
+    cv::Mat tvec = _tvec.getMat();
+    std::cout << type2str(tvec.type()) << std::endl;
+    cv::Mat CM = _cameraMatrix.getMat();
+    std::cout << type2str(CM.type()) << std::endl;
     
-    float z_inter = tvec.getMat().at<float>(3);
-    float fx = cameraMatrix.getMat().at<float>(1,1);
-    float fy = cameraMatrix.getMat().at<float>(2,2);
-    float cx = cameraMatrix.getMat().at<float>(1,3);
-    float cy = cameraMatrix.getMat().at<float>(2,3);
+    float z_inter = tvec.at<double>(2);
+    float fx = CM.at<double>(0,0);
+    float fy = CM.at<double>(1,1);
+    float cx = CM.at<double>(0,2);
+    float cy = CM.at<double>(1,2);
     
     // TODO: Could use some more low-level and parallelism, but hey, I'm short on time.
     
     for (auto iter = imagePoints.begin(); iter < imagePoints.end(); iter++) {
-        cv::Point3f xyz = cv::Point3f((iter->x - cx)/fx*z_inter,
+        cv::Point3d xyz = cv::Point3d((iter->x - cx)/fx*z_inter,
                                       (iter->y - cy)/fy*z_inter,
                                       z_inter);
-        cv::Mat XYZ = R.getMat().t() * cv::Mat(xyz) - tvec.getMat();
+        cv::Mat bleh = cv::Mat(xyz).reshape(1,3);
+        std::cout << type2str(bleh.type()) << std::endl;
+        cv::Mat XYZ = R.t() * cv::Mat(xyz).reshape(1,3);
+        XYZ = XYZ - tvec;
         outputPoints.emplace_back(XYZ);
     }
     

@@ -165,7 +165,7 @@ void fileSave(void (*callback)(std::string* filePath, void* userData) = NULL, vo
 
 void showSettingsWindow(SyncThreadsParameters *sync , int* bracketValue) {
     ImGui::Begin("Settings", &show_settings_window);
-    ImGui::Text("This is a test");
+    ImGui::Text("Settings");
     ImGui::SliderInt("Color bracket", bracketValue, 1, 150);
     //ImGui::TextWrapped("%s", text);
     if (sync->newResultsAreAvailable) {
@@ -363,6 +363,40 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
         
         fileSelection(_loadCalibration, _loadCalibrationUserData);
         fileSave(_saveCalibration, _saveCalibrationUserData);
+        
+        // MARK: Result present
+        if (sync->backprojectionReferenceIsSet) {
+            ImGui::Begin("Results");
+            ImGui::Text("Get results for this frame");
+            ImGui::SameLine();
+            static std::vector<cv::Point3f> res;
+            // Could be made "real time", had error with static above ^^
+            if(ImGui::Button("Get") && sync->backprojectionResultsAreAvailable) {
+                res = sync->backprojectionResult;
+            }
+            
+            ImGui::Text("Positions (x,y,z)");
+            ImGui::Columns(3);
+            ImGui::Text("x");
+            ImGui::NextColumn();
+            ImGui::Text("y");
+            ImGui::NextColumn();
+            ImGui::Text("z");
+            ImGui::NextColumn();
+            ImGui::Separator();
+            if (res.size() != 0) {
+                for (auto iter = res.begin(); iter < res.end(); iter++) {
+                    ImGui::Text("%f", iter->x);
+                    ImGui::NextColumn();
+                    ImGui::Text("%f", iter->y);
+                    ImGui::NextColumn();
+                    ImGui::Text("%f", iter->z);
+                    ImGui::NextColumn();
+                }
+            }
+            
+            ImGui::End();
+        }
         
         
     } else {
