@@ -13,36 +13,33 @@
 #include <stdio.h>
 #include <iostream>
 #include "SDL2/SDL.h"
-#include "pthread.h"
+#include "Views.hpp"
 
-enum THREADSIG {
-    STOP,
-    CONTINUE
-};
+typedef int KeyPress;
 
 class ImageView{
 public:
     ImageView(std::string windowName,unsigned int x, unsigned int y, unsigned int width, unsigned height);
     ~ImageView();
     void showBGR(unsigned char bgr[],unsigned int width, unsigned int height);
+    void showGrayscale(unsigned char *gray, unsigned int width, unsigned int height);
     void close();
-    bool isValid();
+    KeyPress waitKeyAndProcessEvent(unsigned int waitTimeMS);
+    void setMouseDownCallback(void (*mouseDownCallback)(int x, int y, void* userData), void* userData);
+    
     
     
 private:
-    unsigned int sizeX;
-    unsigned int sizeY;
-    SDL_Window *window;
-    SDL_Renderer *renderer;
+    unsigned int _sizeX;
+    unsigned int _sizeY;
+    SDL_Window *_window;
+    SDL_Renderer *_renderer;
     //SDL_Surface *currentSurface;
-    SDL_Texture *currentTexture;
+    SDL_Texture *_currentTexture;
     
-    
-    // Event thread
-    pthread_t _eventThreadId;
-    int eventThreadExitSignal = CONTINUE;
-    friend void *eventThreadStart(void*);
-    void (*_mouseDownCallback)(int x, int y) = nullptr;
+    // Mouse callback
+    void (*_mouseDownCallback)(int, int, void*) = NULL;
+    void* _mouseDownCallbackUserData;
     
 };
 

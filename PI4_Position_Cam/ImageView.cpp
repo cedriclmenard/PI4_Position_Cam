@@ -8,48 +8,49 @@
 
 #include "ImageView.hpp"
 
-// Declaration
-void *eventThreadStart(void*);
+// Compile time supporting functions
 
-bool SDLisInit = false;
+// Grayscale
+static SDL_Color grayscalePalette[256];
+static bool grayscalePaletteBuilt = false;
+
+
+// Declaration
+
 
 ImageView::ImageView(std::string windowName,unsigned int x, unsigned int y, unsigned int width, unsigned height) {
-    // Initialize SDL if it is not already
-    if (~SDLisInit) {
-        if (SDL_Init(SDL_INIT_VIDEO) != 0){
-            std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+    InitializeSDLOGLForViews();
+    
+    // Setup palettes
+    if (~grayscalePaletteBuilt) {
+        for (int i = 0; i<256; i++) {
+            grayscalePalette[i].b = grayscalePalette[i].g = grayscalePalette[i].r = i;
         }
     }
     
+    
     // Create window and store pointer
-    window = SDL_CreateWindow(windowName.c_str(), x, y, width, height, SDL_WINDOW_SHOWN);
-    if (window == nullptr){
+    _window = SDL_CreateWindow(windowName.c_str(), x, y, width, height, SDL_WINDOW_SHOWN);
+    if (_window == nullptr){
         std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
     }
     
     // Create rendered
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (renderer == nullptr){
-        SDL_DestroyWindow(window);
+    _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (_renderer == nullptr){
+        SDL_DestroyWindow(_window);
         std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-    }
-    
-    // Create event thread for this window
-    if (pthread_create(&_eventThreadId, 0, eventThreadStart, (void*)this)) {
-        SDL_DestroyWindow(window);
-        SDL_DestroyRenderer(renderer);
-        std::cout << "pthread_create Error" << std::endl;
         SDL_Quit();
     }
 }
 
 ImageView::~ImageView() {
-    SDL_DestroyTexture(currentTexture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    SDL_DestroyTexture(_currentTexture);
+    SDL_DestroyRenderer(_renderer);
+    SDL_DestroyWindow(_window);
+    //SDL_Quit();
+    QuitSDLOGLForViews();
 }
 
 void ImageView::showBGR(unsigned char *bgr, unsigned int width, unsigned int height){
@@ -63,66 +64,111 @@ void ImageView::showBGR(unsigned char *bgr, unsigned int width, unsigned int hei
                                               0xFF0000,
                                               0);
     if (currentSurface == nullptr){
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
+        SDL_DestroyRenderer(_renderer);
+        SDL_DestroyWindow(_window);
         std::cout << "SDL_CreateRGBSurfaceFrom Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
     }
     
-    currentTexture = SDL_CreateTextureFromSurface(renderer, currentSurface);
+    _currentTexture = SDL_CreateTextureFromSurface(_renderer, currentSurface);
     SDL_FreeSurface(currentSurface);
-    if (currentTexture == nullptr){
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
+    if (_currentTexture == nullptr){
+        SDL_DestroyRenderer(_renderer);
+        SDL_DestroyWindow(_window);
         std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
     }
     
     // Invalidate backbuffer (double buffering)
-    SDL_RenderClear(renderer);
+    SDL_RenderClear(_renderer);
     // Draw the texture
-    SDL_RenderCopy(renderer, currentTexture, NULL, NULL);
+    SDL_RenderCopy(_renderer, _currentTexture, NULL, NULL);
     // Update the screen
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(_renderer);
+}
+
+void ImageView::showGrayscale(unsigned char *gray, unsigned int width, unsigned int height){
+    SDL_Surface* currentSurface = SDL_CreateRGBSurfaceFrom(gray,
+                                                           width,
+                                                           height,
+                                                           8,
+                                                           width,
+                                                           0,
+                                                           0,
+                                                           0,
+                                                           0);
+    SDL_SetPaletteColors(currentSurface->format->palette, grayscalePalette, 0, 256);
+    if (currentSurface == nullptr){
+        SDL_DestroyRenderer(_renderer);
+        SDL_DestroyWindow(_window);
+        std::cout << "SDL_CreateRGBSurfaceFrom Error: " << SDL_GetError() << std::endl;
+        SDL_Quit();
+    }
+    
+    _currentTexture = SDL_CreateTextureFromSurface(_renderer, currentSurface);
+    SDL_FreeSurface(currentSurface);
+    if (_currentTexture == nullptr){
+        SDL_DestroyRenderer(_renderer);
+        SDL_DestroyWindow(_window);
+        std::cout << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl;
+        SDL_Quit();
+    }
+    
+    // Invalidate backbuffer (double buffering)
+    SDL_RenderClear(_renderer);
+    // Draw the texture
+    SDL_RenderCopy(_renderer, _currentTexture, NULL, NULL);
+    // Update the screen
+    SDL_RenderPresent(_renderer);
 }
 
 void ImageView::close(){
-    eventThreadExitSignal = STOP;
-    pthread_join(_eventThreadId, NULL);
-    SDL_DestroyTexture(currentTexture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
+    SDL_DestroyTexture(_currentTexture);
+    SDL_DestroyRenderer(_renderer);
+    SDL_DestroyWindow(_window);
     SDL_Quit();
 }
 
-bool ImageView::isValid(){
-    return (eventThreadExitSignal == CONTINUE) ? true : false;
-}
-
-// MARK: Multithreading
-
-typedef ImageView* eventThreadParent;
-
-void *eventThreadStart(void* arg){
-    SDL_Event e;
-    eventThreadParent parent = (eventThreadParent) arg;
-    while (parent->eventThreadExitSignal == CONTINUE) {
-        SDL_PollEvent(&e);
-        switch (e.type) {
-            case SDL_QUIT:
-                parent->close();
-                break;
-            case SDL_KEYDOWN:
-                parent->close();
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-                if (parent->_mouseDownCallback != nullptr) {
-                    parent->_mouseDownCallback(e.button.x,e.button.y);
+KeyPress ImageView::waitKeyAndProcessEvent(unsigned int waitTimeMS){
+    if (waitTimeMS != 0) {
+        SDL_Event e;
+        SDL_Delay(waitTimeMS);
+        unsigned int windowFlags = SDL_GetWindowFlags(_window);
+        if(SDL_PollEvent(&e) && (windowFlags & SDL_WINDOW_INPUT_FOCUS)) {
+            if (e.type == SDL_KEYDOWN) {
+                return e.key.keysym.sym;
+            } else if (e.type == SDL_MOUSEBUTTONDOWN) {
+                if (_mouseDownCallback != NULL) {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    _mouseDownCallback(x,y,_mouseDownCallbackUserData);
                 }
-                break;
+            }
+        }
+        return -1;
+    } else {
+        SDL_Event e;
+        while (true) {  // Stay indefinitely
+            SDL_Delay(100);
+            unsigned int windowFlags = SDL_GetWindowFlags(_window);
+            if(SDL_PollEvent(&e) && (windowFlags & SDL_WINDOW_INPUT_FOCUS)) {
+                if (e.type == SDL_KEYDOWN) {
+                    return e.key.keysym.sym;
+                } else if (e.type == SDL_MOUSEBUTTONDOWN) {
+                    if (_mouseDownCallback != NULL) {
+                        int x, y;
+                        SDL_GetMouseState(&x, &y);
+                        _mouseDownCallback(x,y,_mouseDownCallbackUserData);
+                    }
+                }
+            }
+
         }
     }
-    pthread_exit(NULL);
 }
 
+void ImageView::setMouseDownCallback(void (*mouseDownCallback)(int x, int y, void* userData), void* userData){
+    _mouseDownCallbackUserData = userData;
+    _mouseDownCallback = mouseDownCallback;
+}
 
