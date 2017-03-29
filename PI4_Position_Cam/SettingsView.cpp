@@ -10,7 +10,7 @@
 #include "Fonts.hpp"
 
 // MARK: GUI style variables
-ImVec4 clearColor = ImColor(255,255,255);
+ImVec4 clearColor = ImColor(200,200,200);
 ImVec4 titleBarColor = ImColor(150,150,150);
 ImVec4 titleBarColorDark = ImColor(90,90,90);
 ImVec4 closeButtonLight = ImColor(180,50,50);

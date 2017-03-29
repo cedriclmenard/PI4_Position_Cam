@@ -101,11 +101,8 @@ void backproject2Dto3DFixedZ(std::vector<cv::Point2f> &imagePoints, std::vector<
     outputPoints.reserve(imagePoints.size());
     
     cv::Mat R = _R.getMat();
-    std::cout << type2str(R.type()) << std::endl;
     cv::Mat tvec = _tvec.getMat();
-    std::cout << type2str(tvec.type()) << std::endl;
     cv::Mat CM = _cameraMatrix.getMat();
-    std::cout << type2str(CM.type()) << std::endl;
     
     float z_inter = tvec.at<double>(2);
     float fx = CM.at<double>(0,0);
@@ -119,10 +116,7 @@ void backproject2Dto3DFixedZ(std::vector<cv::Point2f> &imagePoints, std::vector<
         cv::Point3d xyz = cv::Point3d((iter->x - cx)/fx*z_inter,
                                       (iter->y - cy)/fy*z_inter,
                                       z_inter);
-        cv::Mat bleh = cv::Mat(xyz).reshape(1,3);
-        std::cout << type2str(bleh.type()) << std::endl;
-        cv::Mat XYZ = R.t() * cv::Mat(xyz).reshape(1,3);
-        XYZ = XYZ - tvec;
+        cv::Mat XYZ = R.t() * cv::Mat(xyz).reshape(1,3) - tvec;
         outputPoints.emplace_back(XYZ);
     }
     
