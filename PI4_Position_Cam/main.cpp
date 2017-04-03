@@ -153,15 +153,19 @@ static int main_imageprocessing(void* data) {
             
             // MARK: Result processing (PNP)
             static BackprojectTransformation bpTsf;
-            if (sync.computeReferenceForPNP) {
+            if (sync.computeReferenceForPNP && calibDev.checkIfCalibrated()) {
                 bpTsf.initComputeReference(sync.resultPoint, sync.wingSize, calibDev.getCameraMat());
                 sync.backprojectionReferenceIsSet = true;
                 sync.computeReferenceForPNP = false;
+            } else {
+                sync.computeReferenceForPNP = false;
             }
-            if (sync.computeBackprojection) {
+            if (sync.computeBackprojection && calibDev.checkIfCalibrated()) {
                 sync.backprojectionResultsAreAvailable = false;
                 bpTsf.backproject2Dto3D(sync.resultPoint, sync.backprojectionResult);
                 sync.backprojectionResultsAreAvailable = true;
+            } else {
+                sync.computeBackprojection = false;
             }
             
             

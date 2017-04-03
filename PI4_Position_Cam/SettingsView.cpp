@@ -298,6 +298,7 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
     // MARK: Event processing
     if (event.type == SDL_QUIT) {
         _toQuit = true;
+        sync->stopProgram = true;
         return;
     }
     
