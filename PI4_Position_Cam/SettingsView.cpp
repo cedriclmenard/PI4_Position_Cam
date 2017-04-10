@@ -193,9 +193,11 @@ void showSettingsWindow(SyncThreadsParameters *sync , int* bracketValue) {
         sync->startCalibration = true;
     }
     
+    ImGui::Separator();
+    ImGui::Text("Reprojection");
     ImGui::InputFloat("Wing size [m]", &sync->wingSize);
     if (sync->wingSize <= 0.0) sync->wingSize = 0.1;
-    ImGui::SameLine();
+    //ImGui::SameLine();
     if (!sync->computeReferenceForPNP) {
         if (ImGui::Button("Set As Reference Frame")) {
             sync->computeReferenceForPNP = true;
@@ -312,9 +314,18 @@ void SettingsView::runForThisFrame(int w, int h, SyncThreadsParameters *sync) {
             showMenuFile(sync->startCalibration);
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Tools")) {
+        if (ImGui::BeginMenu("Show")) {
             if (ImGui::MenuItem("Show/Hide Style Pane")) {
                 show_style_menu = !show_style_menu;
+            }
+            if (ImGui::MenuItem("Show/Hide Settings Window")) {
+                show_settings_window = !show_settings_window;
+            }
+            if (ImGui::MenuItem("Show/Hide Initial Image Window")) {
+                show_initial_image_window = !show_initial_image_window;
+            }
+            if (ImGui::MenuItem("Show/Hide Binary Image Window")) {
+                show_binary_image_window = !show_binary_image_window;
             }
             ImGui::EndMenu();
         }
