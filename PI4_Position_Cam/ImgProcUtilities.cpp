@@ -42,7 +42,7 @@ void BackprojectTransformation::initComputeReference(std::vector<cv::Point2f> &i
 }
 
 void BackprojectTransformation::backproject2Dto3D(std::vector<cv::Point2f> &imagePoints, std::vector<cv::Point3f> &outputPoints) {
-    imagePoints.clear();
+    outputPoints.clear();
     backproject2Dto3DFixedZ(imagePoints, outputPoints, _cameraMatrix, _R, _T);
 }
 
