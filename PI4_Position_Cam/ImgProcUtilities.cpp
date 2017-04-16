@@ -33,12 +33,12 @@ std::string type2str(int type) {
     return r;
 }
 
-void BackprojectTransformation::initComputeReference(std::vector<cv::Point2f> &imagePoints, float wingSize, cv::InputArray cameraMatrix) {
+void BackprojectTransformation::initComputeReference(cv::InputArray cameraMatrix, float cameraAngleFromXZPlaneRad, float cameraDistance) {
     _cameraMatrix = cameraMatrix.getMat();
     _R.create(3, 3, CV_32F);
-    cv::Mat rvec;
-    computePNPReferenceTransformation(imagePoints, wingSize, _cameraMatrix, rvec, _T);
-    cv::Rodrigues(rvec, _R);
+    //cv::Mat rvec;
+    computePoseFromDistanceAndCameraAngle(cameraAngleFromXZPlaneRad, cameraDistance, _R, _T);
+    //cv::Rodrigues(rvec, _R);
 }
 
 void BackprojectTransformation::backproject2Dto3D(std::vector<cv::Point2f> &imagePoints, std::vector<cv::Point3f> &outputPoints) {
@@ -55,20 +55,46 @@ void BackprojectTransformation::backproject2Dto3D(std::vector<cv::Point2f> &imag
 
 void computePNPReferenceTransformation(std::vector<cv::Point2f> &imagePoints, float wingSize, cv::InputArray cameraMatrix, cv::OutputArray rvec, cv::OutputArray tvec) {
     // For camera perspective : x is going left, y is going up and z is going toward the wing
-    size_t imagePointsSize = imagePoints.size();
-    float increment = wingSize/(imagePointsSize-1);
+//    size_t imagePointsSize = imagePoints.size();
+//    float increment = wingSize/(imagePointsSize-1);
     std::vector<cv::Point3f> objectPoints;
-    objectPoints.reserve(imagePointsSize);
+//    objectPoints.reserve(imagePointsSize);
+//    
+//    
+//    // Build object points vector
+//    for (int i = imagePointsSize - 1; i >= 0; i--) {
+//        objectPoints.emplace_back(0, i*increment,0);
+//    }
+//    
+//    cv::solvePnPRansac(objectPoints, imagePoints, cameraMatrix, cv::Mat(), rvec, tvec);
+//    std::cout << "Rvec = " << rvec.getMatRef() << std::endl;
+//    std::cout << "Tvec = " << tvec.getMatRef() << std::endl;
+    
+    // The previous scheme cannot work, because there's an infinite number of poses possible for a line in 3D space
+    
+    // MARK: TEST
+    objectPoints.emplace_back(0,wingSize,0);
+    objectPoints.emplace_back(0,0,0);
+    std::vector<cv::Point2f> vecPt;
+    vecPt.push_back(*imagePoints.begin());
+    vecPt.push_back(*(imagePoints.end()-1));
+    cv::solvePnP(objectPoints, vecPt, cameraMatrix, cv::Mat(), rvec, tvec);
+    std::cout << "Rvec = " << rvec.getMatRef() << std::endl;
+    std::cout << "Tvec = " << tvec.getMatRef() << std::endl;
     
     
-    // Build object points vector
-    for (int i = imagePointsSize - 1; i >= 0; i--) {
-        objectPoints.emplace_back(0, i*increment,0);
-    }
-    
-    cv::solvePnP(objectPoints, imagePoints, cameraMatrix, cv::Mat(), rvec, tvec);
     
     
+}
+
+void computePoseFromDistanceAndCameraAngle(double cameraAngleFromXZPlaneRad, double cameraDistance, cv::OutputArray rvec, cv::OutputArray tvec) {
+    cv::Mat R = (cv::Mat_<double>(3,3)   <<  1, 0, 0,
+                                            0, cos(M_PI + cameraAngleFromXZPlaneRad), -sin(M_PI + cameraAngleFromXZPlaneRad),
+                                            0, sin(M_PI + cameraAngleFromXZPlaneRad), cos(M_PI + cameraAngleFromXZPlaneRad)
+                                        );
+    //cv::Rodrigues(R,rvec);
+    rvec.assign(R);
+    tvec.assign((cv::Mat_<double>(3,1) << 0, 0, -cameraDistance));
     
 }
 

@@ -65,6 +65,8 @@ struct SyncThreadsParameters {
     
     // For PNP matching
     float wingSize = 0.6;
+    float cameraAngleFromXZPlaneDeg = 0.0;
+    float cameraDistance = 1.0;
     bool computeReferenceForPNP = false;
     bool computeBackprojection = false;
     

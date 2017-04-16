@@ -133,6 +133,17 @@ static int main_imageprocessing(void* data) {
             sync.newResultsAreAvailable = false;
             sync.result = algo.getResult();
             sync.resultPoint = algo.getResultNonZero();
+            // Test
+//            cv::Point pt1;
+//            cv::Point pt2;
+//            if (!sync.resultPoint.empty()) {
+//                pt1 = *sync.resultPoint.begin();
+//                pt2 = *(sync.resultPoint.end()-1);
+//            }
+//            cv::line(img, pt1, pt2, cv::Scalar(255,0,0));
+            
+            // End Test
+            
             sync.newResultsAreAvailable = true;
             
             // This is a wannabe mutex (without all the fuzzy OS-thingy going on)
@@ -154,7 +165,7 @@ static int main_imageprocessing(void* data) {
             // MARK: Result processing (PNP)
             static BackprojectTransformation bpTsf;
             if (sync.computeReferenceForPNP && calibDev.checkIfCalibrated()) {
-                bpTsf.initComputeReference(sync.resultPoint, sync.wingSize, calibDev.getCameraMat());
+                bpTsf.initComputeReference(calibDev.getCameraMat(), sync.cameraAngleFromXZPlaneDeg/180*M_PI, sync.cameraDistance);
                 sync.backprojectionReferenceIsSet = true;
                 sync.computeReferenceForPNP = false;
             } else {

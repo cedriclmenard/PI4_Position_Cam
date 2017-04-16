@@ -14,7 +14,7 @@ std::vector<std::tuple<unsigned int, float>> nonZeroElementsOfVectorResultTuple(
     std::vector<std::tuple<unsigned int, float>> resultNonNull;
     for (auto iter = result.begin(); iter < result.end(); iter++) {
         if ((*iter) != 0) {
-            resultNonNull.emplace_back(iter - result.begin(), (*iter));
+            resultNonNull.emplace_back((*iter), iter - result.begin());
         }
     }
     return resultNonNull;
@@ -24,7 +24,7 @@ std::vector<cv::Point2f> nonZeroElementsOfVectorResult(std::vector<float> &resul
     std::vector<cv::Point2f> resultNonNull;
     for (auto iter = result.begin(); iter < result.end(); iter++) {
         if ((*iter) != 0) {
-            resultNonNull.emplace_back(iter - result.begin(), (*iter));
+            resultNonNull.emplace_back((*iter), iter - result.begin());
         }
     }
     return resultNonNull;
@@ -42,7 +42,7 @@ struct ParallelHorizontalThinning : public cv::ParallelLoopBody {
     float* _points;
     
     ParallelHorizontalThinning(cv::Mat binImg, float *points) :
-    _binImg(binImg), _stepSize(binImg.step1(0)), _cols(binImg.size[0]), _data(binImg.data), _points(points)
+    _binImg(binImg), _stepSize(binImg.step1(0)), _cols(binImg.size[1]), _data(binImg.data), _points(points)
     {
         //_points.reset(new double[binImg.cols], std::default_delete<double[]>());
         //_points = new float[binImg.rows];  // Non-managed, because it is automatically managed when creating
@@ -55,7 +55,7 @@ struct ParallelHorizontalThinning : public cv::ParallelLoopBody {
     
     virtual void operator()(const cv::Range& range) const {
         // Range max is number of rows
-        for (auto i = range.start; i < range.end; i++) {
+        for (auto i = range.start; i <= range.end; i++) {
             unsigned char* start = _data + i*_stepSize;
             unsigned int j = 0;
             
@@ -63,16 +63,17 @@ struct ParallelHorizontalThinning : public cv::ParallelLoopBody {
             unsigned int avgCount = 0;
             while (j < _cols) {
                 while (start[j] == 0) {
+                    j++;
                     if (j >= _cols) {
                         break;
-                    } else {
-                        j++;
                     }
                 }
-                while (start[j] != 0 && j < _cols) {
-                    avgPosition += j;
-                    avgCount++;
-                    j++;
+                if (j < _cols) {
+                    while (start[j] != 0 && j < _cols) {
+                        avgPosition += j;
+                        avgCount++;
+                        j++;
+                    }
                 }
                 if (avgCount != 0) {
                     avgPosition /= avgCount;

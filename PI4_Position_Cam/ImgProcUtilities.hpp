@@ -16,11 +16,13 @@ class BackprojectTransformation {
     cv::Mat _R, _T, _cameraMatrix;
     
 public:
-    void initComputeReference(std::vector<cv::Point2f> &imagePoints, float wingSize, cv::InputArray cameraMatrix);
+    void initComputeReference(cv::InputArray cameraMatrix, float cameraAngleFromXZPlaneRad, float cameraDistance);
     void backproject2Dto3D(std::vector<cv::Point2f> &imagePoints, std::vector<cv::Point3f> &outputPoints);
 };
 
 void computePNPReferenceTransformation(std::vector<cv::Point2f> &imagePoints, float wingSize, cv::InputArray cameraMatrix, cv::OutputArray rvec, cv::OutputArray tvec);
+
+void computePoseFromDistanceAndCameraAngle(double cameraAngleFromXZPlaneRad, double cameraDistance, cv::OutputArray rvec, cv::OutputArray tvec);
 
 void backproject2Dto3DFixedZ(std::vector<cv::Point2f> &imagePoints, std::vector<cv::Point3f> &outputPoints, float Z, cv::InputArray cameraMatrix, cv::InputArray rvec, cv::InputArray tvec);
 

@@ -195,8 +195,13 @@ void showSettingsWindow(SyncThreadsParameters *sync , int* bracketValue) {
     
     ImGui::Separator();
     ImGui::Text("Reprojection");
+    ImGui::PushItemWidth(70);
     ImGui::InputFloat("Wing size [m]", &sync->wingSize);
     if (sync->wingSize <= 0.0) sync->wingSize = 0.1;
+    ImGui::SameLine();
+    ImGui::InputFloat("Camera dist. from wing [m]", &sync->cameraDistance);
+    ImGui::InputFloat("Camera angle for bottom plane [deg]", &sync->cameraAngleFromXZPlaneDeg);
+    ImGui::PopItemWidth();
     //ImGui::SameLine();
     if (!sync->computeReferenceForPNP) {
         if (ImGui::Button("Set As Reference Frame")) {
