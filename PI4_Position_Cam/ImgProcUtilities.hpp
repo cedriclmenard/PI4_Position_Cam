@@ -14,6 +14,7 @@
 
 class BackprojectTransformation {
     cv::Mat _R, _T, _cameraMatrix;
+    double _cameraDistance = 0.0;
     
 public:
     void initComputeReference(cv::InputArray cameraMatrix, float cameraAngleFromXZPlaneRad, float cameraDistance);
@@ -27,5 +28,7 @@ void computePoseFromDistanceAndCameraAngle(double cameraAngleFromXZPlaneRad, dou
 void backproject2Dto3DFixedZ(std::vector<cv::Point2f> &imagePoints, std::vector<cv::Point3f> &outputPoints, float Z, cv::InputArray cameraMatrix, cv::InputArray rvec, cv::InputArray tvec);
 
 void backproject2Dto3DFixedZ(std::vector<cv::Point2f> &imagePoints, std::vector<cv::Point3f> &outputPoints, cv::InputArray cameraMatrix, cv::InputArray rvec, cv::InputArray tvec);
+
+void backproject2Dto3DFixedDistance(std::vector<cv::Point2f> &imagePoints, std::vector<cv::Point3f> &outputPoints, cv::InputArray _cameraMatrix, cv::InputArray _R, double cameraDistance);
 
 #endif /* ImgProcUtilities_hpp */

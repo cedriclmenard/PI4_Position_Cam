@@ -39,11 +39,12 @@ void BackprojectTransformation::initComputeReference(cv::InputArray cameraMatrix
     //cv::Mat rvec;
     computePoseFromDistanceAndCameraAngle(cameraAngleFromXZPlaneRad, cameraDistance, _R, _T);
     //cv::Rodrigues(rvec, _R);
+    _cameraDistance = cameraDistance;
 }
 
 void BackprojectTransformation::backproject2Dto3D(std::vector<cv::Point2f> &imagePoints, std::vector<cv::Point3f> &outputPoints) {
     outputPoints.clear();
-    backproject2Dto3DFixedZ(imagePoints, outputPoints, _cameraMatrix, _R, _T);
+    backproject2Dto3DFixedDistance(imagePoints, outputPoints, _cameraMatrix, _R, _cameraDistance);
 }
 
 
@@ -89,12 +90,12 @@ void computePNPReferenceTransformation(std::vector<cv::Point2f> &imagePoints, fl
 
 void computePoseFromDistanceAndCameraAngle(double cameraAngleFromXZPlaneRad, double cameraDistance, cv::OutputArray rvec, cv::OutputArray tvec) {
     cv::Mat R = (cv::Mat_<double>(3,3)   <<  1, 0, 0,
-                                            0, cos(M_PI + cameraAngleFromXZPlaneRad), -sin(M_PI + cameraAngleFromXZPlaneRad),
-                                            0, sin(M_PI + cameraAngleFromXZPlaneRad), cos(M_PI + cameraAngleFromXZPlaneRad)
+                                            0, cos(M_PI - cameraAngleFromXZPlaneRad), -sin(M_PI - cameraAngleFromXZPlaneRad),
+                                            0, sin(M_PI - cameraAngleFromXZPlaneRad), cos(M_PI - cameraAngleFromXZPlaneRad)
                                         );
     //cv::Rodrigues(R,rvec);
     rvec.assign(R);
-    tvec.assign((cv::Mat_<double>(3,1) << 0, 0, -cameraDistance));
+    tvec.assign(R*(cv::Mat_<double>(3,1) << 0, 0, -cameraDistance));
     
 }
 
@@ -131,11 +132,11 @@ void backproject2Dto3DFixedZ(std::vector<cv::Point2f> &imagePoints, std::vector<
     cv::Mat tvec = _tvec.getMat();
     cv::Mat CM = _cameraMatrix.getMat();
     
-    float z_inter = tvec.at<double>(2);
-    float fx = CM.at<double>(0,0);
-    float fy = CM.at<double>(1,1);
-    float cx = CM.at<double>(0,2);
-    float cy = CM.at<double>(1,2);
+    double z_inter = tvec.at<double>(2);
+    double fx = CM.at<double>(0,0);
+    double fy = CM.at<double>(1,1);
+    double cx = CM.at<double>(0,2);
+    double cy = CM.at<double>(1,2);
     
     // TODO: Could use some more low-level and parallelism, but hey, I'm short on time.
     
@@ -145,6 +146,32 @@ void backproject2Dto3DFixedZ(std::vector<cv::Point2f> &imagePoints, std::vector<
                                       z_inter);
         cv::Mat XYZ = R.t() * cv::Mat(xyz).reshape(1,3) - tvec;
         outputPoints.emplace_back(XYZ);
+    }
+    
+}
+
+void backproject2Dto3DFixedDistance(std::vector<cv::Point2f> &imagePoints, std::vector<cv::Point3f> &outputPoints, cv::InputArray _cameraMatrix, cv::InputArray _R, double cameraDistance) {
+    outputPoints.reserve(imagePoints.size());
+    
+    cv::Mat R = _R.getMat();
+    cv::Mat CM = _cameraMatrix.getMat();
+    double fx = CM.at<double>(0,0);
+    double fy = CM.at<double>(1,1);
+    double cx = CM.at<double>(0,2);
+    double cy = CM.at<double>(1,2);
+    
+    
+    for (auto iter = imagePoints.begin(); iter < imagePoints.end(); iter++) {
+        double u = iter->x;
+        double v = iter->y;
+        double r22 = ((double*)R.data)[4];
+        double r23 = ((double*)R.data)[5];
+        double r32 = ((double*)R.data)[7];
+        double r33 = ((double*)R.data)[8];
+        double z_inter = cameraDistance/(r32*(v-cy)/fy + r33);
+        double a = z_inter*(u-cx)/fx;
+        double b = r22*z_inter*(v-cy)/fy + r23*z_inter;
+        outputPoints.emplace_back(a,b,cameraDistance);
     }
     
 }
